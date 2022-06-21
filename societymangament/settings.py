@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'staffresident',
     'resident',
+    'notifcations',
 ]
 
 MIDDLEWARE = [
