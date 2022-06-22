@@ -1,6 +1,7 @@
 from django.contrib.auth import password_validation
 from rest_framework import serializers
 from user.models import User
+from resident.models import UserRole
 
 """ Creating serializer for regstration the normal user into your system """
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -47,4 +48,8 @@ class UserChangePasswordSerializer(serializers.Serializer):
         return attrs
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = User
+        fields = ['email', 'name']

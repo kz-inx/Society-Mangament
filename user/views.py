@@ -2,7 +2,7 @@ from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPass
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from user.serializers import UserRegistrationSerializer, UserLoginSerializer, UserChangePasswordSerializer
+from user.serializers import UserRegistrationSerializer, UserLoginSerializer, UserChangePasswordSerializer, UserProfileSerializer
 from resident.serializers import UserDataEnter
 from staffresident.serializers import StaffData
 from django.contrib.auth import authenticate
@@ -11,8 +11,8 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import User
 from resident.models import UserRole
 from staffresident.models import StaffRole
-from .message import UserRegstration, UserWrong, UserEmailNotMatch, UserNotVerified, UserLogin, UserChangepassword,\
-    PasswordResetConform, PasswordResetLinkSent, StaffChangePassword,StaffChangePasswordAnother
+from .message import UserRegstration, UserWrong, UserEmailNotMatch, UserNotVerified, UserLogin, UserChangepassword, \
+    PasswordResetConform, PasswordResetLinkSent, StaffChangePassword, StaffChangePasswordAnother
 
 """ Generating the token for the system """
 
@@ -96,6 +96,7 @@ class LoginIntoSystem(APIView):
             return Response({'access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
                             status=status.HTTP_200_OK)
 
+
 """ User change password by providing the necessary details"""
 class UserChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
@@ -122,14 +123,17 @@ class UserChangePasswordView(APIView):
 
 
 """Overriding post method for changing Response"""
+
+
 class PasswordResetView(ResetPasswordRequestToken):
 
     def post(self, request, *args, **kwargs):
         response = super(PasswordResetView, self).post(request)
         return Response(
-            {'status': 'OK', 'message':PasswordResetLinkSent },
+            {'status': 'OK', 'message': PasswordResetLinkSent},
             status=response.status_code
         )
+
 
 """Overriding post method for changing Response"""
 class PasswordResetConfirm(ResetPasswordConfirm):
@@ -137,8 +141,14 @@ class PasswordResetConfirm(ResetPasswordConfirm):
     def post(self, request, *args, **kwargs):
         response = super(PasswordResetConfirm, self).post(request)
         return Response(
-            {'status': 'OK', 'message':PasswordResetConform},
+            {'status': 'OK', 'message': PasswordResetConform},
             status=response.status_code
         )
 
 
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

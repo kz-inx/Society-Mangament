@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'staffresident',
     'resident',
     'notifcations',
+    'compliant',
 ]
 
 MIDDLEWARE = [
