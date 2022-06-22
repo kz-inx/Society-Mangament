@@ -88,12 +88,12 @@ class LoginIntoSystem(APIView):
         print(user, "detailed")
         # print(user,"")
         if user_auth is None:
-            return Response({'msg': UserEmailNotMatch}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':'fail','msg': UserEmailNotMatch}, status=status.HTTP_404_NOT_FOUND)
         elif user:
-            return Response({'msg': UserNotVerified}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':'Unverfied','msg': UserNotVerified}, status=status.HTTP_400_BAD_REQUEST)
         else:
             token = get_tokens_for_user(user_auth)
-            return Response({'access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
+            return Response({'status':'okk','access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
                             status=status.HTTP_200_OK)
 
 
@@ -123,8 +123,6 @@ class UserChangePasswordView(APIView):
 
 
 """Overriding post method for changing Response"""
-
-
 class PasswordResetView(ResetPasswordRequestToken):
 
     def post(self, request, *args, **kwargs):
@@ -145,7 +143,7 @@ class PasswordResetConfirm(ResetPasswordConfirm):
             status=response.status_code
         )
 
-
+""" User can see his profile in the system... """
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 

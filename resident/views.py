@@ -9,8 +9,6 @@ from .models import UserRole
 from .message import UserNotGiven, UserStatus, UserAlreadyVerified
 
 """ Admin will see user whose status is_verified is false """
-
-
 class UserListView(ListAPIView):
     permission_classes = [IsAdminUser]
     queryset = UserRole.objects.all()
@@ -22,8 +20,6 @@ class UserListView(ListAPIView):
 
 
 """ Admin will update the status and give the permission to the user access the application """
-
-
 class UserStatusUpdate(APIView):
     permission_classes = [IsAdminUser]
 

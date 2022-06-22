@@ -19,7 +19,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validate_data):
         return User.objects.create_user(**validate_data)
 
-
+""" User login view serializers fetching the data from the database"""
 class UserLoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255)
 
@@ -27,7 +27,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
         model = User
         fields = ['email', 'password']
 
-
+""" User change password serilaizers takeing two  password change init"""
 class UserChangePasswordSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
     password2 = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
@@ -47,9 +47,13 @@ class UserChangePasswordSerializer(serializers.Serializer):
         user.save()
         return attrs
 
-
+""" User Profile view from the system.."""
 class UserProfileSerializer(serializers.ModelSerializer):
+    house_no = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['email', 'name']
+        fields = ['email', 'name', 'house_no']
+
+    def get_house_no(self, obj):
+        return obj.user_data.get().house_no

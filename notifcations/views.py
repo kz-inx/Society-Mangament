@@ -60,7 +60,6 @@ class SeeNotifcation(ListAPIView):
     queryset = Notifcation.objects.all()
     serializer_class = AdminNotifcationSerializers
 
-
     def get_queryset(self):
         userrole = UserRole.objects.get(user=self.request.user)
         queryset = Notifcation.objects.filter(Q(house_no=userrole.house_no) | Q(house_no="")).order_by('-created_at')
