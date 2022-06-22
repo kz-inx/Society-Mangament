@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'resident',
     'notifcations',
     'compliant',
+    'vistiors',
 ]
 
 MIDDLEWARE = [
