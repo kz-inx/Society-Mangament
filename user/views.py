@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from user.serializers import UserRegistrationSerializer, UserLoginSerializer, UserChangePasswordSerializer, UserProfileSerializer
-from resident.serializers import UserDataEnter
-from staffresident.serializers import StaffData
+from resident.serializers import UserDataEnter, GetUserData
+from staffresident.serializers import StaffData, GetStaffData
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -147,6 +147,17 @@ class PasswordResetConfirm(ResetPasswordConfirm):
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, format=None):
-        serializer = UserProfileSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request):
+        current_user = request.user
+        print(current_user)
+        try:
+            staff_role = StaffRole.objects.get(user=current_user)
+            if staff_role:
+                serializer = GetStaffData(staff_role)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except StaffRole.DoesNotExist:
+            resident_user = UserRole.objects.get(user=current_user)
+            if resident_user:
+                serializer = GetUserData(resident_user)
+                return Response(serializer.data, status=status.HTTP_200_OK)

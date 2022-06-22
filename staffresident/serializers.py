@@ -14,3 +14,12 @@ class StaffData(serializers.ModelSerializer):
     class Meta:
         model = StaffRole
         fields = ['role']
+
+class GetStaffData(serializers.ModelSerializer):
+    user_name = serializers.CharField(source="user.name", read_only=True)
+    user_email = serializers.CharField(source="user.email", read_only=True)
+    rolename = serializers.CharField(source="role.rolename")
+
+    class Meta:
+        model = StaffRole
+        fields = ['user_name','user_email','rolename']

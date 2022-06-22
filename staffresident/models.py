@@ -11,5 +11,5 @@ class RolesStaff(models.Model):
 """ Creating the database of the staff-account in the our system """
 class StaffRole(models.Model):
     user = models.ForeignKey(User,default=None, on_delete=models.CASCADE)
-    role = models.ForeignKey(RolesStaff, default=None, on_delete=models.CASCADE)
+    role = models.ForeignKey(RolesStaff, default=None, on_delete=models.CASCADE, related_name='staff_data')
     change_password = models.BooleanField(default=False)

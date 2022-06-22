@@ -17,6 +17,14 @@ class UserListSerializer(serializers.ModelSerializer):
         model = UserRole
         fields = ['id', 'user_name', 'user_email', 'is_verfied', 'house_no']
 
+class GetUserData(serializers.ModelSerializer):
+    user_name = serializers.CharField(source="user.name", read_only=True)
+    user_email = serializers.CharField(source="user.email", read_only=True)
+
+    class Meta:
+        model = UserRole
+        fields = fields = ['user_name','user_email','house_no']
+
 
 
 
