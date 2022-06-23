@@ -149,7 +149,6 @@ class UserProfileView(APIView):
 
     def get(self, request):
         current_user = request.user
-        print(current_user)
         try:
             staff_role = StaffRole.objects.get(user=current_user)
             if staff_role:
