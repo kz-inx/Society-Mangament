@@ -18,3 +18,4 @@ class VisitorsSociety(models.Model):
     is_status = models.CharField(choices=visitors_Status, default='Unverified', max_length=15)
     user = models.ForeignKey(UserRole,default=None, on_delete=models.CASCADE, null=True)
     staff = models.ForeignKey(StaffRole, default=None, on_delete=models.CASCADE, null=True)
+    is_answer = models.BooleanField(default=False)

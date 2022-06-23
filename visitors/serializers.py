@@ -17,3 +17,4 @@ class SeeVisitorsSerializers(serializers.ModelSerializer):
         model = VisitorsSociety
         fields = ['id','name','phone_number']
 
+""" creating a serializers for updating the status of the visitors its done by the user only...."""

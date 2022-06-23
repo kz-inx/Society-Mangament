@@ -1,4 +1,5 @@
 """ Importing Libraries """
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.mail import send_mail
 from user.models import User
 from resident.models import UserRole
-from .message import VerfiyVistiors, NotStaff, NotUser
+from .message import VerfiyVistiors, NotStaff, NotUser, VistiorsNotAvailable, VisitorsStatus, VisitorIsAllAlreadyVerfied
 
 """ creating a apiview to sent the notifcation to the user which visitors has come to meet him """
 class AdminSentNotifcationParticular(APIView):
@@ -19,6 +20,7 @@ class AdminSentNotifcationParticular(APIView):
 
     def post(self,request):
         current_user = request.user
+
         try:
             staff_role = StaffRole.objects.get(user=current_user)
             serializer = VisitorsRegisterSerializers(data=request.data, context={'request':self.request})
@@ -65,6 +67,47 @@ class SeeVisitors(ListAPIView):
 
 
 "creating a class will visitors will verify or reject the visitors and staff will notify via email "
+class UpdateStatusVisitors(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post (self,request):
+        current_user = request.user
+        print(f"Current user is:- {current_user}")
+        # print(request.user.id)
+        try:
+            staff_role = UserRole.objects.get(user=current_user)
+            if staff_role:
+                visitor_id = request.data.get('id')
+                visitor_id= get_object_or_404(VisitorsSociety,id=visitor_id)
+                visitor_status = request.data.get('is_status')
+                user_id = request.user.user_data.get()
+                visitor = VisitorsSociety.objects.get(id=visitor_id)
+                visitor.is_status=visitor_status
+                visitor.user = user_id
+                if not visitor.is_answer:
+
+                    visitor.is_answer=True
+                    visitor.save()
+                    staff = visitor.staff
+                    staff_email = staff.user.email
+                    send_mail(
+                        'Status Update Related Visitors',
+                        visitor_status,
+                        'djangoblogkunal@gmail.com',
+                        [staff_email],
+                        fail_silently=False,
+                    )
+                    if visitor is None:
+                        return Response({'status':'Not available','msg':VistiorsNotAvailable},status=status.HTTP_404_NOT_FOUND)
+                    else:
+                        return Response({'status':'Solved','msg':VisitorsStatus}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'status': 'Not available', 'msg': VisitorIsAllAlreadyVerfied },
+                                    status=status.HTTP_404_NOT_FOUND)
+
+        except UserRole.DoesNotExist:
+            return Response({'status':'fail','msg':NotUser},status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
