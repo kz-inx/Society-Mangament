@@ -12,7 +12,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.mail import send_mail
 from user.models import User
 from resident.models import UserRole
-from .message import VerfiyVistiors, NotStaff, NotUser, VistiorsNotAvailable, VisitorsStatus, VisitorIsAllAlreadyVerfied
+from .message import VerfiyVistiors, NotStaff, NotUser, VistiorsNotAvailable, VisitorsStatus, \
+    VisitorIsAllAlreadyVerfied,PasswordChangePending
 
 """ creating a apiview to sent the notifcation to the user which visitors has come to meet him """
 class AdminSentNotifcationParticular(APIView):
@@ -23,24 +24,28 @@ class AdminSentNotifcationParticular(APIView):
 
         try:
             staff_role = StaffRole.objects.get(user=current_user)
-            serializer = VisitorsRegisterSerializers(data=request.data, context={'request':self.request})
-            if serializer.is_valid(raise_exception=True):
-                staffaccount = StaffRole.objects.get(user=self.request.user)
-                notifcation = serializer.save(staff=staffaccount)
-                print(f"notifcation recieve {notifcation}")
-                house_no = notifcation.house_no
-                user_query = UserRole.objects.filter(house_no=house_no).values("user")
-                email_list = User.objects.filter(id__in=user_query).values_list('email', flat=True)
-                print(f"email_list:- {email_list}")
-                send_mail(
-                    'Visitors Verify mail',
-                    notifcation.name,
-                    'djangoblogkunal@gmail.com',
-                    email_list,
-                    fail_silently=False,
-                )
-                return Response({'status':'Successfully','msg':VerfiyVistiors}, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            print(staff_role.change_password)
+            if staff_role.change_password:
+                serializer = VisitorsRegisterSerializers(data=request.data, context={'request':self.request})
+                if serializer.is_valid(raise_exception=True):
+                    staffaccount = StaffRole.objects.get(user=self.request.user)
+                    notifcation = serializer.save(staff=staffaccount)
+                    print(f"notifcation recieve {notifcation}")
+                    house_no = notifcation.house_no
+                    user_query = UserRole.objects.filter(house_no=house_no).values("user")
+                    email_list = User.objects.filter(id__in=user_query).values_list('email', flat=True)
+                    print(f"email_list:- {email_list}")
+                    send_mail(
+                        'Visitors Verify mail',
+                        notifcation.name,
+                        'djangoblogkunal@gmail.com',
+                        email_list,
+                        fail_silently=False,
+                    )
+                    return Response({'status':'Successfully','msg':VerfiyVistiors}, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({'status':'Fail','msg':PasswordChangePending }, status=status.HTTP_400_BAD_REQUEST)
 
         except StaffRole.DoesNotExist:
             return Response({'status':'fail','msg':NotStaff}, status=status.HTTP_400_BAD_REQUEST)

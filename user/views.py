@@ -2,7 +2,8 @@ from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPass
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from user.serializers import UserRegistrationSerializer, UserLoginSerializer, UserChangePasswordSerializer, UserProfileSerializer
+from rest_framework.generics import DestroyAPIView
+from user.serializers import UserRegistrationSerializer, UserLoginSerializer, UserChangePasswordSerializer,AdminDeleteUserSerializers
 from resident.serializers import UserDataEnter, GetUserData
 from staffresident.serializers import StaffData, GetStaffData
 from django.contrib.auth import authenticate
@@ -12,11 +13,10 @@ from .models import User
 from resident.models import UserRole
 from staffresident.models import StaffRole
 from .message import UserRegstration, UserWrong, UserEmailNotMatch, UserNotVerified, UserLogin, UserChangepassword, \
-    PasswordResetConform, PasswordResetLinkSent, StaffChangePassword, StaffChangePasswordAnother
+    PasswordResetConform, PasswordResetLinkSent, StaffChangePassword, StaffChangePasswordAnother, UserNotAvailable, \
+    UserAlreadyBlock, UserBlock, BlockUser
 
 """ Generating the token for the system """
-
-
 def get_tokens_for_user(user):
     print(user, "user")
     # print(user.user_id,"user_id")
@@ -28,11 +28,11 @@ def get_tokens_for_user(user):
     }
 
 
-""" Creating a class view for regstration to the new user into our system"""
-
 
 class UserRegistrationView(APIView):
-
+    """
+    Creating a class view for regstration to the new user into our system
+    """
     def post(self, request, fromat=None):
         commonserializer = UserRegistrationSerializer(data=request.data.get("commondata"))
         if commonserializer.is_valid(raise_exception=True):
@@ -48,11 +48,10 @@ class UserRegistrationView(APIView):
             return Response({'Status': "Fail", "msg": UserWrong}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'Status': "Fail", "msg": UserWrong}, status=status.HTTP_400_BAD_REQUEST)
 
-
-""" Creating a class view for regstration to the new staff role into your system...."""
-
-
 class StaffRegistrationView(APIView):
+    """
+    Creating a class view for regstration to the new staff role into your system....
+    """
     permission_classes = [IsAdminUser]
 
     def post(self, request, fromat=None):
@@ -70,11 +69,10 @@ class StaffRegistrationView(APIView):
             return Response({'Status': "Fail", "msg": UserWrong}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'Status': "Fail", "msg": UserWrong}, status=status.HTTP_400_BAD_REQUEST)
 
-
-""" Creating a class view for login into the system..."""
-
-
 class LoginIntoSystem(APIView):
+    """
+    Creating a class view for login into the system...
+    """
 
     def post(self, request, format=None):
         serializer = UserLoginSerializer(data=request.data)
@@ -84,21 +82,26 @@ class LoginIntoSystem(APIView):
         user_auth = authenticate(email=email, password=password)
         print(user_auth, "authenticated")
         user = UserRole.objects.filter(is_verfied=False, user=user_auth).first()
+        user_status = User.objects.filter(id=user,is_active=True).first()
         # print(user.house_no)
         print(user, "detailed")
         # print(user,"")
-        if user_auth is None:
-            return Response({'status':'fail','msg': UserEmailNotMatch}, status=status.HTTP_404_NOT_FOUND)
-        elif user:
-            return Response({'status':'Unverfied','msg': UserNotVerified}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            token = get_tokens_for_user(user_auth)
-            return Response({'status':'okk','access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
-                            status=status.HTTP_200_OK)
+        if user_status:
+            if user_auth is None:
+                return Response({'status':'fail','msg': UserEmailNotMatch}, status=status.HTTP_404_NOT_FOUND)
+            elif user:
+                return Response({'status':'Unverfied','msg': UserNotVerified}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                token = get_tokens_for_user(user_auth)
+                return Response({'status':'okk','access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
+                                status=status.HTTP_200_OK)
 
+        return Response({'status':'Fail','msg':BlockUser},status=status.HTTP_400_BAD_REQUEST)
 
-""" User change password by providing the necessary details"""
 class UserChangePasswordView(APIView):
+    """
+    User change password by providing the necessary details
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
@@ -121,10 +124,10 @@ class UserChangePasswordView(APIView):
             serializer.is_valid(raise_exception=True)
             return Response({'msg': UserChangepassword}, status=status.HTTP_200_OK)
 
-
-"""Overriding post method for changing Response"""
 class PasswordResetView(ResetPasswordRequestToken):
-
+    """
+    Overriding post method for changing Response
+    """
     def post(self, request, *args, **kwargs):
         response = super(PasswordResetView, self).post(request)
         return Response(
@@ -132,9 +135,10 @@ class PasswordResetView(ResetPasswordRequestToken):
             status=response.status_code
         )
 
-
-"""Overriding post method for changing Response"""
 class PasswordResetConfirm(ResetPasswordConfirm):
+    """
+    Overriding post method for changing Response
+    """
 
     def post(self, request, *args, **kwargs):
         response = super(PasswordResetConfirm, self).post(request)
@@ -143,8 +147,10 @@ class PasswordResetConfirm(ResetPasswordConfirm):
             status=response.status_code
         )
 
-""" User can see his profile in the system... """
 class UserProfileView(APIView):
+    """
+    User can see his profile in the system...
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -160,3 +166,30 @@ class UserProfileView(APIView):
             if resident_user:
                 serializer = GetUserData(resident_user)
                 return Response(serializer.data, status=status.HTTP_200_OK)
+
+class AdminBlockUser(APIView):
+    """
+    Block the user or staff in the system
+    """
+    def post(self,request):
+        permission_classes = [IsAdminUser]
+        user_id = request.data.get('id')
+        user_block = User.objects.filter(id=user_id).first()
+        if user_block is None:
+            return Response({'status':'Fail','msg':UserNotAvailable},status=status.HTTP_400_BAD_REQUEST)
+        elif not User.is_active:
+            return Response({'status':'Fail','msg':UserAlreadyBlock}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            user_block.is_active = False
+            user_block.save()
+            return Response({'status':'Pass','msg':UserBlock},status=status.HTTP_200_OK)
+
+class AdminDeleteUser(DestroyAPIView):
+    """
+    Admin will delte the user perament from the
+    """
+    serializer_class = AdminDeleteUserSerializers
+    permission_classes = [IsAdminUser]
+    queryset = User.objects.all()
+
+
