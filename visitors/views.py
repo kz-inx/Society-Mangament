@@ -14,7 +14,7 @@ from django.core.mail import send_mail
 from user.models import User
 from resident.models import UserRole
 from .message import VerfiyVistiors, NotStaff, NotUser, VistiorsNotAvailable, VisitorsStatus, \
-    VisitorIsAllAlreadyVerfied,PasswordChangePending
+    VisitorIsAllAlreadyVerfied, PasswordChangePending
 
 class AdminSentNotifcationParticular(APIView):
     """
@@ -38,7 +38,7 @@ class AdminSentNotifcationParticular(APIView):
                     send_mail(
                         'Visitors Verify mail',
                         notifcation.name,
-                        'djangoblogkunal@gmail.com',
+                        'EMAIL_USER',
                         email_list,
                         fail_silently=False,
                     )
@@ -99,7 +99,7 @@ class UpdateStatusVisitors(APIView):
                     send_mail(
                         'Status Update Related Visitors',
                         visitor_status,
-                        'djangoblogkunal@gmail.com',
+                        'EMAIL_USER',
                         [staff_email],
                         fail_silently=False,
                     )

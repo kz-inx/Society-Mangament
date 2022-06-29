@@ -27,7 +27,7 @@ class AdminSentNotifcationAll(APIView):
             send_mail(
                 notifcation.title,
                 notifcation.message,
-                'djangoblogkunal@gmail.com',
+                'EMAIL_USER',
                 email_list,
                 fail_silently=False,
             )
@@ -51,7 +51,7 @@ class AdminSentNotifcationParticular(APIView):
             send_mail(
                 notifcation.title,
                 notifcation.message,
-                'djangoblogkunal@gmail.com',
+                'EMAIL_USER',
                 email_list,
                 fail_silently=False,
             )
