@@ -3,15 +3,20 @@ from rest_framework import serializers
 from .models import UserCompliant
 from resident.models import UserRole
 
-""" Creating the serializers for the user can filed compliant """
 class UserFileCompliantSerializers(serializers.ModelSerializer):
+    """
+    User complain can see by the admin of the system only
+    """
     class Meta:
         model = UserCompliant
         fields = ['title', 'subject']
 
 
-""" User complain can see by the admin of the system only """
+
 class SeeCompliantSerializers(serializers.ModelSerializer):
+    """
+    User complain can see by the admin of the system only
+    """
     # user = serializers.SerializerMethodField()
     house_no = serializers.SerializerMethodField()
 
@@ -24,4 +29,3 @@ class SeeCompliantSerializers(serializers.ModelSerializer):
     class Meta:
         model = UserCompliant
         fields = ['id','title','subject','user','status', 'house_no']
-        # fields = '__all__'

@@ -10,7 +10,7 @@ UserChangepassword = " User your Password Update Successfully"
 
 UserStatus = "Changed Status of the user..."
 
-UserEmailNotMatch = "Email or Password is not Valid"
+UserEmailNotMatch = "No Active user with given credentials "
 
 UserNotVerified = "You are not verified by the admin"
 
@@ -31,3 +31,5 @@ UserAlreadyBlock = "User is already block into the system. Please Check the ID"
 UserBlock = "User is Block into the system."
 
 BlockUser = "You are have been blocked by the Admin of the system"
+
+DeleteUserStaff = "Successfully deleted from the system "

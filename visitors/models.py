@@ -1,12 +1,10 @@
+""" Importing Libraries """
 from django.db import models
-
+from django.utils import timezone
 from resident.models import UserRole
-from user.models import User
 from staffresident.models import StaffRole
-# Create your models here.
 
 class VisitorsSociety(models.Model):
-
     name = models.CharField(max_length=200)
     phone_number = models.CharField(max_length=15)
     house_no = models.CharField(max_length=25)
@@ -19,3 +17,4 @@ class VisitorsSociety(models.Model):
     user = models.ForeignKey(UserRole,default=None, on_delete=models.CASCADE, null=True)
     staff = models.ForeignKey(StaffRole, default=None, on_delete=models.CASCADE, null=True)
     is_answer = models.BooleanField(default=False)
+    date_posted = models.DateTimeField(default=timezone.now)

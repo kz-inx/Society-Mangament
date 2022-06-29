@@ -2,10 +2,10 @@ from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPass
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import DestroyAPIView
+from rest_framework.generics import DestroyAPIView, ListAPIView, get_object_or_404
 from user.serializers import UserRegistrationSerializer, UserLoginSerializer, UserChangePasswordSerializer,AdminDeleteUserSerializers
-from resident.serializers import UserDataEnter, GetUserData
-from staffresident.serializers import StaffData, GetStaffData
+from resident.serializers import UserDataEnter, GetUserData, UserViewProfile
+from staffresident.serializers import StaffData, GetStaffData, StaffViewProfile
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -14,7 +14,7 @@ from resident.models import UserRole
 from staffresident.models import StaffRole
 from .message import UserRegstration, UserWrong, UserEmailNotMatch, UserNotVerified, UserLogin, UserChangepassword, \
     PasswordResetConform, PasswordResetLinkSent, StaffChangePassword, StaffChangePasswordAnother, UserNotAvailable, \
-    UserAlreadyBlock, UserBlock, BlockUser
+    UserAlreadyBlock, UserBlock, BlockUser, DeleteUserStaff
 
 """ Generating the token for the system """
 def get_tokens_for_user(user):
@@ -26,8 +26,6 @@ def get_tokens_for_user(user):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
-
-
 
 class UserRegistrationView(APIView):
     """
@@ -73,7 +71,6 @@ class LoginIntoSystem(APIView):
     """
     Creating a class view for login into the system...
     """
-
     def post(self, request, format=None):
         serializer = UserLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -81,22 +78,25 @@ class LoginIntoSystem(APIView):
         password = serializer.data.get('password')
         user_auth = authenticate(email=email, password=password)
         print(user_auth, "authenticated")
-        user = UserRole.objects.filter(is_verfied=False, user=user_auth).first()
-        user_status = User.objects.filter(id=user,is_active=True).first()
-        # print(user.house_no)
-        print(user, "detailed")
-        # print(user,"")
-        if user_status:
-            if user_auth is None:
-                return Response({'status':'fail','msg': UserEmailNotMatch}, status=status.HTTP_404_NOT_FOUND)
-            elif user:
-                return Response({'status':'Unverfied','msg': UserNotVerified}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                token = get_tokens_for_user(user_auth)
-                return Response({'status':'okk','access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
-                                status=status.HTTP_200_OK)
+        if not user_auth:
+            return Response({'status': 'fail', 'msg': UserEmailNotMatch}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            user_auth.staffrole_set.get()
+            token = get_tokens_for_user(user_auth)
+            return Response(
+                {'status': 'okk', 'access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
+                status=status.HTTP_200_OK)
+        except:
+            print("Not staff")
 
-        return Response({'status':'Fail','msg':BlockUser},status=status.HTTP_400_BAD_REQUEST)
+        user_verified = user_auth.user_data.get()
+        if not user_verified.is_verfied:
+            return Response({'status': 'Unverified', 'msg': UserNotVerified}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            token = get_tokens_for_user(user_auth)
+            return Response(
+                {'status': 'okk', 'access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
+                status=status.HTTP_200_OK)
 
 class UserChangePasswordView(APIView):
     """
@@ -158,26 +158,27 @@ class UserProfileView(APIView):
         try:
             staff_role = StaffRole.objects.get(user=current_user)
             if staff_role:
-                serializer = GetStaffData(staff_role)
+                serializer = StaffViewProfile(staff_role)
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
         except StaffRole.DoesNotExist:
             resident_user = UserRole.objects.get(user=current_user)
             if resident_user:
-                serializer = GetUserData(resident_user)
+                serializer = UserViewProfile(resident_user)
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AdminBlockUser(APIView):
+    permission_classes = [IsAdminUser]
     """
     Block the user or staff in the system
     """
     def post(self,request):
-        permission_classes = [IsAdminUser]
         user_id = request.data.get('id')
+        # user_id = get_object_or_404(User, id=user_id)
         user_block = User.objects.filter(id=user_id).first()
         if user_block is None:
             return Response({'status':'Fail','msg':UserNotAvailable},status=status.HTTP_400_BAD_REQUEST)
-        elif not User.is_active:
+        elif not user_block.is_active:
             return Response({'status':'Fail','msg':UserAlreadyBlock}, status=status.HTTP_400_BAD_REQUEST)
         else:
             user_block.is_active = False
@@ -188,8 +189,30 @@ class AdminDeleteUser(DestroyAPIView):
     """
     Admin will delte the user perament from the
     """
-    serializer_class = AdminDeleteUserSerializers
     permission_classes = [IsAdminUser]
+    serializer_class = AdminDeleteUserSerializers
     queryset = User.objects.all()
 
+    def delete(self, request, *args, **kwargs):
+        response = super(AdminDeleteUser, self).delete(request, *args, **kwargs)
+        return Response({
+            'status':'Pass',
+            'msg':DeleteUserStaff
+        }, status=response.status_code)
+
+class AdminSeeAllStaff(ListAPIView):
+    """
+    Admin Will see all details of the staff register into the system
+    """
+    permission_classes = [IsAdminUser]
+    queryset = StaffRole.objects.all()
+    serializer_class = GetStaffData
+
+class AdminSeeAllUser(ListAPIView):
+    """
+    Admin Will see all details of the user register into the system
+    """
+    permission_classes = [IsAdminUser]
+    queryset = UserRole.objects.all()
+    serializer_class = GetUserData
 

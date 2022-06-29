@@ -12,8 +12,10 @@ from django.core.mail import send_mail
 from user.models import User
 from resident.models import UserRole
 
-""" Send Notifications to all user in the system """
 class AdminSentNotifcationAll(APIView):
+    """
+     Send Notifications to all user in the system
+     """
     permission_classes = [IsAdminUser]
 
     def post(self, request):
@@ -32,8 +34,11 @@ class AdminSentNotifcationAll(APIView):
             return Response({'status':'Successfully','msg': SentNotifcation}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-""" Send notifications to particular user in the system"""
+
 class AdminSentNotifcationParticular(APIView):
+    """
+    Send notifications to particular user in the system
+    """
     permission_classes = [IsAdminUser]
 
     def post(self,request):
@@ -53,13 +58,13 @@ class AdminSentNotifcationParticular(APIView):
             return Response({'status':'Successfully','msg': SentParticularUser}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-""" See notification by the user on there particular endpoint """
 class SeeNotifcation(ListAPIView):
+    """
+     See notification by the user on there particular endpoint
+     """
     permission_classes = [IsAuthenticated]
     queryset = Notifcation.objects.all()
     serializer_class = AdminNotifcationSerializers
-
     def get_queryset(self):
         userrole = UserRole.objects.get(user=self.request.user)
         queryset = Notifcation.objects.filter(Q(house_no=userrole.house_no) | Q(house_no="")).order_by('-created_at')
