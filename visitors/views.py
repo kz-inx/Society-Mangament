@@ -6,15 +6,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from staffresident.models import StaffRole
-from .serializers import VisitorsRegisterSerializers, SeeVisitorsSerializers, StaffSeeAllVisitorsSerializers,UserSeeAllVisitorsSerializers
+from .serializers import VisitorsRegisterSerializers, SeeVisitorsSerializers, StaffSeeAllVisitorsSerializers,\
+    UserSeeAllVisitorsSerializers, DailyVistiorsSerializers
 from .models import VisitorsSociety
 from django.db.models import Q
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.core.mail import send_mail
 from user.models import User
 from resident.models import UserRole
 from .message import VerfiyVistiors, NotStaff, NotUser, VistiorsNotAvailable, VisitorsStatus, \
-    VisitorIsAllAlreadyVerfied, PasswordChangePending
+    VisitorIsAllAlreadyVerfied, PasswordChangePending, VisitorsRegstration, VisitorsRegstrationFail
+
 
 class AdminSentNotifcationParticular(APIView):
     """
@@ -157,6 +159,23 @@ class UserSeeAllVisitors(APIView):
                 return Response({'data': serialized_data.data})
         except UserRole.DoesNotExist:
             return Response({'status': 'fail', 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DailyVisitorsRegister(APIView):
+    """
+    creating a view where admin will register the daily visitors into the system
+    """
+    permission_classes = [IsAdminUser]
+    def post(self,request):
+        serializer = DailyVistiorsSerializers(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response ({'status':'Pass','msg':VisitorsRegstration}, status=status.HTTP_201_CREATED)
+        return Response({'status':'fail','msg':VisitorsRegstrationFail},status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 
 

@@ -13,3 +13,7 @@ VisitorsStatus = "Update Successfully the status of Visitors"
 VisitorIsAllAlreadyVerfied = "Already this visitors is verified by you"
 
 PasswordChangePending = "Please Change your password after your first login into the system.."
+
+VisitorsRegstration = "Successfully New Daily Visitors has been register.... "
+
+VisitorsRegstrationFail = "Something went wrong please check data once again...."

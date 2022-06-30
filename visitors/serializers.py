@@ -1,6 +1,6 @@
 """ Importing Libraries"""
 from rest_framework import serializers
-from .models import VisitorsSociety
+from .models import VisitorsSociety, DailyVisitorsSociety
 
 class VisitorsRegisterSerializers(serializers.ModelSerializer):
     """
@@ -37,5 +37,13 @@ class UserSeeAllVisitorsSerializers(serializers.ModelSerializer):
         model = VisitorsSociety
         fields = ['name','phone_number','is_status','date_posted']
 
+
+class DailyVistiorsSerializers(serializers.ModelSerializer):
+    """
+    creating a serializers for the new daily visitors into the society register into the system
+    """
+    class Meta:
+        model = DailyVisitorsSociety
+        fields = ['serial_id', 'name', 'phone_number', 'profile_pics', 'addharcard_number']
 
 

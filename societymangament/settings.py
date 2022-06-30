@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'notifcations',
     'compliant',
     'visitors',
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [
@@ -161,6 +162,10 @@ USE_TZ = True
 
 
 AUTH_USER_MODEL = 'user.User'
+
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = 'static/'
