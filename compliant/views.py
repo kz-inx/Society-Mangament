@@ -55,7 +55,6 @@ class AdminUpdateStatusCompliant(APIView):
     Creating class view for the admin to solve the compliant of society member
     """
     permission_classes = [IsAdminUser]
-
     def post(self,request):
         compliant_id = request.data.get('id')
         compliant_id= get_object_or_404(UserCompliant, id=compliant_id)

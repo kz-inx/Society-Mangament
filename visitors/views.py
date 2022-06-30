@@ -6,14 +6,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from staffresident.models import StaffRole
-from .serializers import VisitorsRegisterSerializers, SeeVisitorsSerializers, StaffSeeAllVisitorsSerializers,\
-    UserSeeAllVisitorsSerializers, DailyVistiorsSerializers
+from .serializers import VisitorsRegisterSerializers, SeeVisitorsSerializers, StaffSeeAllVisitorsSerializers, \
+    UserSeeAllVisitorsSerializers, DailyVistiorsSerializers, StaffVerifyDailyVisitors
 from .models import VisitorsSociety
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.core.mail import send_mail
 from user.models import User
 from resident.models import UserRole
+from .models import DailyVisitorsSociety
 from .message import VerfiyVistiors, NotStaff, NotUser, VistiorsNotAvailable, VisitorsStatus, \
     VisitorIsAllAlreadyVerfied, PasswordChangePending, VisitorsRegstration, VisitorsRegstrationFail
 
@@ -23,12 +24,13 @@ class AdminSentNotifcationParticular(APIView):
     creating a apiview to sent the notifcation to the user which visitors has come to meet him
     """
     permission_classes = [IsAuthenticated]
-    def post(self,request):
+
+    def post(self, request):
         current_user = request.user
         try:
             staff_role = StaffRole.objects.get(user=current_user)
             if staff_role.change_password:
-                serializer = VisitorsRegisterSerializers(data=request.data, context={'request':self.request})
+                serializer = VisitorsRegisterSerializers(data=request.data, context={'request': self.request})
                 if serializer.is_valid(raise_exception=True):
                     staffaccount = StaffRole.objects.get(user=self.request.user)
                     notifcation = serializer.save(staff=staffaccount)
@@ -44,13 +46,14 @@ class AdminSentNotifcationParticular(APIView):
                         email_list,
                         fail_silently=False,
                     )
-                    return Response({'status':'Successfully','msg':VerfiyVistiors}, status=status.HTTP_201_CREATED)
+                    return Response({'status': 'Successfully', 'msg': VerfiyVistiors}, status=status.HTTP_201_CREATED)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({'status':'Fail','msg':PasswordChangePending }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 'Fail', 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
 
         except StaffRole.DoesNotExist:
-            return Response({'status':'fail','msg':NotStaff}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 'fail', 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class SeeVisitors(ListAPIView):
     """
@@ -59,6 +62,7 @@ class SeeVisitors(ListAPIView):
     permission_classes = [IsAuthenticated]
     query_set = VisitorsSociety.objects.all()
     serializer_class = SeeVisitorsSerializers
+
     def get(self, request):
         try:
             current_user = request.user
@@ -69,9 +73,8 @@ class SeeVisitors(ListAPIView):
                 serialized_data = SeeVisitorsSerializers(queryset, many=True)
                 return Response({'data': serialized_data.data})
         except Exception as e:
-            print(e,type(e))
-            return Response({'status': 'fail', 'msg':NotUser},status=status.HTTP_400_BAD_REQUEST)
-
+            print(e, type(e))
+            return Response({'status': 'fail', 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateStatusVisitors(APIView):
@@ -79,7 +82,8 @@ class UpdateStatusVisitors(APIView):
     creating a class will visitors will verify or reject the visitors and staff will notify via email
     """
     permission_classes = [IsAuthenticated]
-    def post (self,request):
+
+    def post(self, request):
         current_user = request.user
         print(f"Current user is:- {current_user}")
         # print(request.user.id)
@@ -87,14 +91,14 @@ class UpdateStatusVisitors(APIView):
             staff_role = UserRole.objects.get(user=current_user)
             if staff_role:
                 visitor_id = request.data.get('id')
-                visitor_id= get_object_or_404(VisitorsSociety,id=visitor_id)
+                visitor_id = get_object_or_404(VisitorsSociety, id=visitor_id)
                 visitor_status = request.data.get('is_status')
                 user_id = request.user.user_data.get()
                 visitor = VisitorsSociety.objects.get(id=visitor_id)
-                visitor.is_status=visitor_status
+                visitor.is_status = visitor_status
                 visitor.user = user_id
                 if not visitor.is_answer:
-                    visitor.is_answer=True
+                    visitor.is_answer = True
                     visitor.save()
                     staff = visitor.staff
                     staff_email = staff.user.email
@@ -106,15 +110,16 @@ class UpdateStatusVisitors(APIView):
                         fail_silently=False,
                     )
                     if visitor is None:
-                        return Response({'status':'Not available','msg':VistiorsNotAvailable},status=status.HTTP_404_NOT_FOUND)
+                        return Response({'status': 'Not available', 'msg': VistiorsNotAvailable},
+                                        status=status.HTTP_404_NOT_FOUND)
                     else:
-                        return Response({'status':'Solved','msg':VisitorsStatus}, status=status.HTTP_200_OK)
+                        return Response({'status': 'Solved', 'msg': VisitorsStatus}, status=status.HTTP_200_OK)
                 else:
-                    return Response({'status': 'Not available', 'msg': VisitorIsAllAlreadyVerfied },
+                    return Response({'status': 'Not available', 'msg': VisitorIsAllAlreadyVerfied},
                                     status=status.HTTP_404_NOT_FOUND)
 
         except UserRole.DoesNotExist:
-            return Response({'status': 'fail', 'msg':NotUser},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 'fail', 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class StaffSeeAllVisitors(APIView):
@@ -124,6 +129,7 @@ class StaffSeeAllVisitors(APIView):
     permission_classes = [IsAuthenticated]
     query_set = VisitorsSociety.objects.all()
     serializer_class = StaffSeeAllVisitorsSerializers
+
     def get(self, request):
         try:
             current_user = request.user
@@ -134,10 +140,11 @@ class StaffSeeAllVisitors(APIView):
                 queryset = VisitorsSociety.objects.filter(date_posted__gte=week_ago)
                 serialized_data = StaffSeeAllVisitorsSerializers(queryset, many=True)
                 return Response({'data': serialized_data.data})
-            return Response ({'status': 'Fail', 'msg':PasswordChangePending }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 'Fail', 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
 
         except StaffRole.DoesNotExist:
-            return Response({'status': 'fail', 'msg':NotStaff}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 'fail', 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserSeeAllVisitors(APIView):
     """
@@ -146,7 +153,8 @@ class UserSeeAllVisitors(APIView):
     permission_classes = [IsAuthenticated]
     query_Set = VisitorsSociety.objects.all()
     serializer_class = UserSeeAllVisitorsSerializers
-    def get(self,request):
+
+    def get(self, request):
         try:
             current_user = request.user
             resident_user = UserRole.objects.get(user=current_user)
@@ -166,12 +174,40 @@ class DailyVisitorsRegister(APIView):
     creating a view where admin will register the daily visitors into the system
     """
     permission_classes = [IsAdminUser]
-    def post(self,request):
+
+    def post(self, request):
         serializer = DailyVistiorsSerializers(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response ({'status':'Pass','msg':VisitorsRegstration}, status=status.HTTP_201_CREATED)
-        return Response({'status':'fail','msg':VisitorsRegstrationFail},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 'Pass', 'msg': VisitorsRegstration}, status=status.HTTP_201_CREATED)
+        return Response({'status': 'fail', 'msg': VisitorsRegstrationFail}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DailyVisitorsVerify(APIView):
+    """
+    Creating a view for staff where they can verify the regular visitors into the society
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, serial_id):
+        current_user = request.user
+        try:
+            staff_role = StaffRole.objects.get(user=current_user)
+            if staff_role.change_password:
+                daily_visitor_query = get_object_or_404(DailyVisitorsSociety, serial_id=serial_id)
+                serializer = StaffVerifyDailyVisitors(daily_visitor_query)
+                return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            return Response({'status': 'Fail', 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
+
+        except StaffRole.DoesNotExist:
+            return Response({'status': 'fail', 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
 
 
 
