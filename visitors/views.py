@@ -94,7 +94,7 @@ class UpdateStatusVisitors(APIView):
                 visitor_id = get_object_or_404(VisitorsSociety, id=visitor_id)
                 visitor_status = request.data.get('is_status')
                 user_id = request.user.user_data.get()
-                visitor = VisitorsSociety.objects.get(id=visitor_id)
+                visitor = VisitorsSociety.objects.get(id=visitor_id.id)
                 visitor.is_status = visitor_status
                 visitor.user = user_id
                 if not visitor.is_answer:
