@@ -26,7 +26,7 @@ class GetUserData(serializers.ModelSerializer):
     """
     Admin will able to see whole profile information of all user
     """
-    user_id = serializers.CharField(source="user,id",read_only=True)
+    user_id = serializers.CharField(source="user.id",read_only=True)
     user_name = serializers.CharField(source="user.name", read_only=True)
     user_email = serializers.CharField(source="user.email", read_only=True)
 
