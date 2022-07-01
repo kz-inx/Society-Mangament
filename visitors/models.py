@@ -7,7 +7,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 class VisitorsSociety(models.Model):
     name = models.CharField(max_length=200)
-    phone_number = models.CharField(max_length=15)
+    phone_number = PhoneNumberField()
     house_no = models.CharField(max_length=25)
     visitors_Status = [
         ('Accepted', 'Accepted'),

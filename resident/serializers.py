@@ -52,7 +52,7 @@ class UserPayMaintenanceSerializers(serializers.ModelSerializer):
     """
     class Meta:
         model = UserPayMaintenance
-        fields = ['house_no','amount_pay','next_pay_date']
+        fields = ['house_no','amount_pay']
 
 
 

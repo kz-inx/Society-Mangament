@@ -15,4 +15,3 @@ class UserPayMaintenance(models.Model):
     house_no = models.CharField(max_length=10)
     amount_pay = models.CharField(max_length=12)
     pay_date = models.DateTimeField(default=timezone.now)
-    next_pay_date = models.DateField()

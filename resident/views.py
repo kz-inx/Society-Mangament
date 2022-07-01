@@ -1,5 +1,5 @@
 """ Importing Libraries """
-import datetime as DT
+from datetime import datetime
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -43,18 +43,23 @@ class UserPayMaintance(APIView):
     def post(self,request):
         current_user = request.user
         data = request.data.copy()
+        print(data)
         try:
             user_role = UserRole.objects.get(user=current_user)
             print(f"User Role:- {user_role}")
             if user_role:
-                today = DT.date.today()
-                month_ago = today + DT.timedelta(days=30)
+                currentMonth = datetime.now().month
+                print(currentMonth)
+                currentYear = datetime.now().year
+                print(currentYear)
                 user_house = user_role.house_no
-                data['next_pay_date'] = month_ago
                 data['house_no'] = user_house
-                queryset = UserPayMaintenance.objects.filter(house_no=user_house , next_pay_date__lt=today).first()
-                if queryset:
-                    print(queryset)
+                print(user_house)
+                print(data)
+                queryset = UserPayMaintenance.objects.filter(house_no=user_house, pay_date__month=currentMonth, pay_date__year=currentYear).first()
+                print(queryset)
+                if queryset is None:
+                    print(f"Print QuerySet:- {queryset}")
                     serializers= UserPayMaintenanceSerializers(data=data)
                     if serializers.is_valid(raise_exception=True):
                         serializers.save()
