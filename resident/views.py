@@ -5,13 +5,18 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from .serializers import UserListSerializer,UserPayMaintenanceSerializers
-from .models import UserRole
+from .serializers import UserListSerializer, UserPayMaintenanceSerializers, AdminSeeAllMaintenanceRecordsSerializers
+from .models import UserRole, UserPayMaintenance
 from .message import UserNotGiven, UserStatus, UserAlreadyVerified, SuccessfullyPaid, ErrorOccur, AlreadyPaid, NotUser
-from .models import UserPayMaintenance
+import stripe
 
-""" Admin will see user whose status is_verified is false """
+stripe.api_key = 'sk_test_51LHhAgSFfGW1sF18frp7b8yqNOVyHwkSgzxvfT8aHgugxQxcoChSxVud8Sg6lzJZB55ZkezAFWTqPpE9l855D8GN00ovX9Egb8'
+
+
 class UserListView(ListAPIView):
+    """
+    Admin will see user whose status is_verified is false
+    """
     permission_classes = [IsAdminUser]
     queryset = UserRole.objects.all()
     serializer_class = UserListSerializer
@@ -21,8 +26,10 @@ class UserListView(ListAPIView):
         return queryset
 
 
-""" Admin will update the status and give the permission to the user access the application """
 class UserStatusUpdate(APIView):
+    """
+    Admin will update the status and give the permission to the user access the application
+    """
     permission_classes = [IsAdminUser]
 
     def post(self, request, format=None):
@@ -37,10 +44,15 @@ class UserStatusUpdate(APIView):
             user.save()
             return Response({'msg': UserStatus}, status=status.HTTP_200_OK)
 
+
 class UserPayMaintance(APIView):
+    """
+    User will the pay the maintenance of the society using the endpoint
+    """
     permission_classes = [IsAuthenticated]
     query_set = UserPayMaintenance.objects.all()
-    def post(self,request):
+
+    def post(self, request):
         current_user = request.user
         data = request.data.copy()
         print(data)
@@ -49,32 +61,54 @@ class UserPayMaintance(APIView):
             print(f"User Role:- {user_role}")
             if user_role:
                 currentMonth = datetime.now().month
-                print(currentMonth)
                 currentYear = datetime.now().year
-                print(currentYear)
                 user_house = user_role.house_no
                 data['house_no'] = user_house
-                print(user_house)
-                print(data)
-                queryset = UserPayMaintenance.objects.filter(house_no=user_house, pay_date__month=currentMonth, pay_date__year=currentYear).first()
-                print(queryset)
+                queryset = UserPayMaintenance.objects.filter(house_no=user_house, pay_date__month=currentMonth,
+                                                             pay_date__year=currentYear).first()
                 if queryset is None:
-                    print(f"Print QuerySet:- {queryset}")
-                    serializers= UserPayMaintenanceSerializers(data=data)
+                    serializers = UserPayMaintenanceSerializers(data=data)
                     if serializers.is_valid(raise_exception=True):
+                        payment_method = stripe.PaymentMethod.create(
+                            type="card",
+                            card={
+                                "number": "4242424242424242",
+                                "exp_month": 7,
+                                "exp_year": 2023,
+                                "cvc": "314",
+                            },
+                        )
+                        print(payment_method.id)
+                        customer = stripe.Customer.create(
+                            email=request.user.email, payment_method=payment_method.id
+                        )
+                        print(customer, "customer.........")
+                        stripe.PaymentIntent.create(
+                            customer=customer.id,
+                            payment_method=payment_method.id,
+                            currency='usd',
+                            amount=2500,
+                            confirm=True,
+                        )
                         serializers.save()
                         return Response({'status': 'pass', 'msg': SuccessfullyPaid}, status=status.HTTP_200_OK)
                     return Response({'status': 'fail', 'msg': ErrorOccur}, status=status.HTTP_400_BAD_REQUEST)
-                return Response({'status': 'fail', 'msg': AlreadyPaid},status=status.HTTP_400_BAD_REQUEST)
+                return Response({'status': 'fail', 'msg': AlreadyPaid}, status=status.HTTP_400_BAD_REQUEST)
 
         except UserRole.DoesNotExist:
             return Response({'status': 'fail', 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class AdminCanSeeAllRecordsMaintance(APIView):
+    """
+    Admin will see all the records the related to the user pay maintenance into the system
+    """
+    permission_classes = [IsAdminUser]
 
-
-
-
-
-
-
+    def get(self, request):
+        month = request.GET.get("month")
+        print(month)
+        data = UserPayMaintenance.objects.filter(pay_date__month=month)
+        # queryset = UserPayMaintenance.objects.all().order_by('-pay_date')
+        serializer = AdminSeeAllMaintenanceRecordsSerializers(data, many=True)
+        return Response({'status': 'pass', 'data': serializer.data}, status=status.HTTP_200_OK)

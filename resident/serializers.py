@@ -7,9 +7,11 @@ class UserDataEnter(serializers.ModelSerializer):
     """
     serializers that will enter the house_no into the system
     """
+
     class Meta:
         model = UserRole
         fields = ['house_no']
+
 
 class UserListSerializer(serializers.ModelSerializer):
     """
@@ -22,17 +24,18 @@ class UserListSerializer(serializers.ModelSerializer):
         model = UserRole
         fields = ['id', 'user_name', 'user_email', 'is_verfied', 'house_no']
 
+
 class GetUserData(serializers.ModelSerializer):
     """
     Admin will able to see whole profile information of all user
     """
-    user_id = serializers.CharField(source="user.id",read_only=True)
+    user_id = serializers.CharField(source="user.id", read_only=True)
     user_name = serializers.CharField(source="user.name", read_only=True)
     user_email = serializers.CharField(source="user.email", read_only=True)
 
     class Meta:
         model = UserRole
-        fields = ['user_id','user_name','user_email','house_no']
+        fields = ['user_id', 'user_name', 'user_email', 'house_no']
 
 
 class UserViewProfile(serializers.ModelSerializer):
@@ -46,20 +49,22 @@ class UserViewProfile(serializers.ModelSerializer):
         model = UserRole
         fields = ['user_name', 'user_email', 'house_no']
 
+
 class UserPayMaintenanceSerializers(serializers.ModelSerializer):
     """
     user will be able to pay the maintenance into the system by providing the details
     """
+
     class Meta:
         model = UserPayMaintenance
-        fields = ['house_no','amount_pay']
+        fields = ['house_no', 'amount_pay']
 
 
+class AdminSeeAllMaintenanceRecordsSerializers(serializers.ModelSerializer):
+    """
+    Admin will be able to see all the records of payment done by the society members into the system....
+    """
 
-
-
-
-
-
-
-
+    class Meta:
+        model = UserPayMaintenance
+        fields = ['house_no', 'amount_pay', 'pay_date']

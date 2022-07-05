@@ -33,3 +33,7 @@ UserBlock = "User is Block into the system."
 BlockUser = "You are have been blocked by the Admin of the system"
 
 DeleteUserStaff = "Successfully deleted from the system "
+
+NewAdminSystem  = "Admin Role Has Granted to the user of the system"
+
+UserAlreadyBlockORAdmin = "User is already block into the system or already admin into the system..."

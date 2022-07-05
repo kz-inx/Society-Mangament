@@ -64,3 +64,11 @@ class StaffVerifyDailyVisitors(serializers.ModelSerializer):
     class Meta:
         model = DailyVisitorsSociety
         fields = ['name', 'phone_number', 'profile_pics']
+
+class AdminSeeDailyVisitorsRecord(serializers.ModelSerializer):
+    """
+    Admin is able to see all the records of daily staff visitors into the society
+    """
+    class Meta:
+        model = DailyVisitorsSociety
+        fields = ['name','phone_number','profile_pics','addharcard_number']

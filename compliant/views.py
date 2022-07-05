@@ -24,6 +24,12 @@ class UserFileCompliant(APIView):
             house_no = request.user.user_data.get().house_no
             user_query = UserRole.objects.filter(house_no=house_no).values("user")
             email_list = User.objects.filter(id__in=user_query).values_list('email', flat=True)
+            email_list = [email for email in email_list]
+            # print(email_list)
+            email_admin = User.objects.filter(is_admin=True).values_list('email', flat=True)
+            admin_email = [email for email in email_admin]
+            email_list.extend(admin_email)
+            # email_list = chain(email_list, email_admin)
             print(email_list)
             send_mail(
                 instance.title,

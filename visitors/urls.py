@@ -1,7 +1,7 @@
 """ Importing Libraries """
 from django.urls import path, include
 from .views import AdminSentNotifcationParticular, SeeVisitors, UpdateStatusVisitors,\
-    StaffSeeAllVisitors, UserSeeAllVisitors, DailyVisitorsRegister, DailyVisitorsVerify
+    StaffSeeAllVisitors, UserSeeAllVisitors, DailyVisitorsRegister, DailyVisitorsVerify,AdminSeeDailyVisitors
 
 """ End points where the perform the operation into the system """
 urlpatterns = [
@@ -12,4 +12,5 @@ urlpatterns = [
     path('user-see-visitors/',UserSeeAllVisitors.as_view()),
     path('daily-visitors-register/',DailyVisitorsRegister.as_view()),
     path('daily-visitors-verify/<str:serial_id>/', DailyVisitorsVerify.as_view()),
+    path('admin-watch-daily-visitors/',AdminSeeDailyVisitors.as_view())
 ]

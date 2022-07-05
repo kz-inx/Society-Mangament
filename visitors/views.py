@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from staffresident.models import StaffRole
 from .serializers import VisitorsRegisterSerializers, SeeVisitorsSerializers, StaffSeeAllVisitorsSerializers, \
-    UserSeeAllVisitorsSerializers, DailyVistiorsSerializers, StaffVerifyDailyVisitors
+    UserSeeAllVisitorsSerializers, DailyVistiorsSerializers, StaffVerifyDailyVisitors,AdminSeeDailyVisitorsRecord
 from .models import VisitorsSociety
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -201,6 +201,14 @@ class DailyVisitorsVerify(APIView):
 
         except StaffRole.DoesNotExist:
             return Response({'status': 'fail', 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminSeeDailyVisitors(ListAPIView):
+    """
+    Admin of the system is able to see all the records daily visitors into the society
+    """
+    permission_classes = [IsAdminUser]
+    queryset = DailyVisitorsSociety.objects.all()
+    serializer_class = AdminSeeDailyVisitorsRecord
 
 
 

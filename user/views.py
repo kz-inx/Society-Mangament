@@ -14,12 +14,11 @@ from resident.models import UserRole
 from staffresident.models import StaffRole
 from .message import UserRegstration, UserWrong, UserEmailNotMatch, UserNotVerified, UserLogin, UserChangepassword, \
     PasswordResetConform, PasswordResetLinkSent, StaffChangePassword, StaffChangePasswordAnother, UserNotAvailable, \
-    UserAlreadyBlock, UserBlock, BlockUser, DeleteUserStaff
+    UserAlreadyBlock, UserBlock, DeleteUserStaff, NewAdminSystem, UserAlreadyBlockORAdmin
 
 """ Generating the token for the system """
 def get_tokens_for_user(user):
     print(user, "user")
-    # print(user.user_id,"user_id")
     refresh = RefreshToken.for_user(user)
 
     return {
@@ -32,6 +31,18 @@ class UserRegistrationView(APIView):
     Creating a class view for regstration to the new user into our system
     """
     def post(self, request, fromat=None):
+        """
+        Accepts the post request into the system
+
+        Request:
+        Http Request will there
+        it will contain all the data required in the model
+
+        Returns:
+            Request.objects
+            if all value are corrected new account will create of user
+            if anything goes wrong system throw the error
+        """
         commonserializer = UserRegistrationSerializer(data=request.data.get("commondata"))
         if commonserializer.is_valid(raise_exception=True):
             user = commonserializer.save()
@@ -51,8 +62,20 @@ class StaffRegistrationView(APIView):
     Creating a class view for regstration to the new staff role into your system....
     """
     permission_classes = [IsAdminUser]
-
+    """
+    there only admin of the system has permission to perform this operation into the system 
+    """
     def post(self, request, fromat=None):
+        """
+        Accepted the post request into the system
+          Request:
+        Http Request will there
+        it will contain all the data required in the model
+        Returns:
+            Request. Objects
+            if all value are corrected new account will create of staff
+            if anything goes wrong system throw the error
+        """
         commonserializer = UserRegistrationSerializer(data=request.data.get("commondata"))
         if commonserializer.is_valid(raise_exception=True):
             user = commonserializer.save()
@@ -69,7 +92,19 @@ class StaffRegistrationView(APIView):
 
 class LoginIntoSystem(APIView):
     """
-    Creating a class view for login into the system...
+    Creating a class view for login into the system..
+    User need provide credentials for login into the system
+
+    Request:
+        Http Request will there
+        it will contain all the data required in the model
+
+    Return:
+        Request. Object
+        it will request by the client
+        it will check user is verified form admin or not. If not it will throw the error
+        or else
+        it will generate token and login into the system successfully
     """
     def post(self, request, format=None):
         serializer = UserLoginSerializer(data=request.data)
@@ -103,7 +138,16 @@ class UserChangePasswordView(APIView):
     User change password by providing the necessary details
     """
     permission_classes = [IsAuthenticated]
-
+    """
+    client should be verify with his credentials use this feature
+    
+    Request Post: 
+        Http.Request 
+        User need login to perform this action 
+    Return:
+        return.object 
+        the user password will  be change into the system based on role is classified into the system is staff or user 
+    """
     def post(self, request, format=None):
         current_user = request.user
         print(current_user)
@@ -127,6 +171,12 @@ class UserChangePasswordView(APIView):
 class PasswordResetView(ResetPasswordRequestToken):
     """
     Overriding post method for changing Response
+
+    Request Post:
+        Http Request
+        *args Variable length argument list.
+        **kwargs Arbitrary keyword arguments.
+        it will send mail for reset password link
     """
     def post(self, request, *args, **kwargs):
         response = super(PasswordResetView, self).post(request)
@@ -138,6 +188,11 @@ class PasswordResetView(ResetPasswordRequestToken):
 class PasswordResetConfirm(ResetPasswordConfirm):
     """
     Overriding post method for changing Response
+    Request Post:
+        Http Request
+        *args Variable length argument list.
+        **kwargs Arbitrary keyword arguments.
+        it will take the token and new password and it will update into the system
     """
 
     def post(self, request, *args, **kwargs):
@@ -149,10 +204,19 @@ class PasswordResetConfirm(ResetPasswordConfirm):
 
 class UserProfileView(APIView):
     """
-    User can see his profile in the system...
+    the user of the system will be able to see his whole profile into the system
     """
     permission_classes = [IsAuthenticated]
-
+    """
+    client need to be authenticated into the system 
+    
+    Request Get:
+        Http.Request 
+        It will classify based on user login it show profile its staff or its user
+    Return:
+        Return.objects 
+        it will return the whole profile information about the users into the system 
+    """
     def get(self, request):
         current_user = request.user
         try:
@@ -174,9 +238,8 @@ class AdminBlockUser(APIView):
     """
     def post(self,request):
         user_id = request.data.get('id')
-        # user_id = get_object_or_404(User, id=user_id)
         user_block = User.objects.filter(id=user_id).first()
-        if user_block is None:
+        if not user_block:
             return Response({'status':'Fail','msg':UserNotAvailable},status=status.HTTP_400_BAD_REQUEST)
         elif not user_block.is_active:
             return Response({'status':'Fail','msg':UserAlreadyBlock}, status=status.HTTP_400_BAD_REQUEST)
@@ -184,6 +247,26 @@ class AdminBlockUser(APIView):
             user_block.is_active = False
             user_block.save()
             return Response({'status':'Pass','msg':UserBlock},status=status.HTTP_200_OK)
+
+class NewAdminInSystem (APIView):
+    permission_classes = [IsAdminUser]
+    """
+    Block the user or staff in the system
+    """
+    def post(self,request):
+        user_id = request.data.get('id')
+        # user_id = get_object_or_404(User, id=user_id)
+        user_block = User.objects.filter(id=user_id).first()
+        if not user_block:
+            return Response({'status': 'Fail', 'msg': UserNotAvailable},status=status.HTTP_400_BAD_REQUEST)
+        elif user_block.is_active and user_block.is_admin:
+            return Response({'status':'Fail','msg':UserAlreadyBlockORAdmin}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            user_block.is_admin = True
+            user_block.save()
+            return Response({'status': 'Pass', 'msg': NewAdminSystem},status=status.HTTP_200_OK)
+
+
 
 class AdminDeleteUser(DestroyAPIView):
     """
