@@ -22,6 +22,13 @@ from .message import VerfiyVistiors, NotStaff, NotUser, VistiorsNotAvailable, Vi
 class AdminSentNotifcationParticular(APIView):
     """
     creating a apiview to sent the notifcation to the user which visitors has come to meet him
+    staff need login into the system to access this endpoint. Any other than staff will try it will throw the error
+    Request post:
+        Http Request
+        staff needs to fill the necessary details like visitors name, phone number etc..
+    Response Objects:
+        If everything goes right it will sent mail to the user related visitors information
+        if anything goes wrong it going raise exception into the system
     """
     permission_classes = [IsAuthenticated]
 
@@ -58,6 +65,14 @@ class AdminSentNotifcationParticular(APIView):
 class SeeVisitors(ListAPIView):
     """
     creating a endpoint where user come see which visitors has come meet him
+    user need login into the system for view this endpoint. This endpoint is only accessible by user only
+    Any other will try to access it will throw the error
+    Request Get:
+        Http request
+        user will able to show visitors name how came meet him
+    Response objects:
+        user will be able to see visitors everything is ok
+        if anything will go wrong it will raise the error
     """
     permission_classes = [IsAuthenticated]
     query_set = VisitorsSociety.objects.all()
@@ -80,9 +95,16 @@ class SeeVisitors(ListAPIView):
 class UpdateStatusVisitors(APIView):
     """
     creating a class will visitors will verify or reject the visitors and staff will notify via email
+    user need login into the system for view this endpoint. This endpoint is only accessible by user only
+    Any other will try to access it will throw the error
+    Request Post:
+        Http.Request
+        user need update the status of visitors using id. where id is pk
+    Response.Objects:
+        if everything's goes correct it will msg staff related status of visitors
+        if anything goes wrong will raise the error msg in from the json data
     """
     permission_classes = [IsAuthenticated]
-
     def post(self, request):
         current_user = request.user
         print(f"Current user is:- {current_user}")
@@ -125,6 +147,13 @@ class UpdateStatusVisitors(APIView):
 class StaffSeeAllVisitors(APIView):
     """
     Staff can see all the visitors come into the society into the last seven days.
+    staff need login into the system to access this endpoint. Any other than staff will try it will throw the error
+    Request get:
+        Http Request
+        staff needs login into the system for view this
+    Response Objects:
+        if everything go ok staff able to see all visitors visit in society in last one week
+        if anything will go wrong it wil raise exception error
     """
     permission_classes = [IsAuthenticated]
     query_set = VisitorsSociety.objects.all()
@@ -149,6 +178,13 @@ class StaffSeeAllVisitors(APIView):
 class UserSeeAllVisitors(APIView):
     """
     User can see all the visitors come into the society into the last seven days
+    user need login into the system to access this endpoint. Any other than user will try it will throw the error
+    Request get:
+        Http Request
+        user needs login into the system for view this
+    Response Objects:
+        if everything go ok user able to see all visitors visit in society in last one week
+        if anything will go wrong it wil raise exception error
     """
     permission_classes = [IsAuthenticated]
     query_Set = VisitorsSociety.objects.all()
@@ -172,9 +208,15 @@ class UserSeeAllVisitors(APIView):
 class DailyVisitorsRegister(APIView):
     """
     creating a view where admin will register the daily visitors into the system
+    Admin of the system is able to see this records another will try it will go throw the errors
+    Request post:
+        Http request
+        admin needs fills all details which needs the require into the database
+    Return Object:
+        Everything's goes okk then user will register into the database
+        if anything goes wrong it will raise error in the form json data
     """
     permission_classes = [IsAdminUser]
-
     def post(self, request):
         serializer = DailyVistiorsSerializers(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -186,6 +228,13 @@ class DailyVisitorsRegister(APIView):
 class DailyVisitorsVerify(APIView):
     """
     Creating a view for staff where they can verify the regular visitors into the society
+    staff role of the system has permission any other will try it will go to throw the errors
+    Request get:
+        Http Request
+        staff needs enters id into the required to be filed
+    Response Objects:
+        If id right then all the information will display of staff
+        If id not available or anything will go wrong into the system it will go the raise error msg in format json
     """
     permission_classes = [IsAuthenticated]
 
@@ -205,6 +254,8 @@ class DailyVisitorsVerify(APIView):
 class AdminSeeDailyVisitors(ListAPIView):
     """
     Admin of the system is able to see all the records daily visitors into the society
+    Admin of the system is able to see this records another will try it will go throw the errors
+    Admin is able to see all the records of daily visitors with the necessary information needed
     """
     permission_classes = [IsAdminUser]
     queryset = DailyVisitorsSociety.objects.all()

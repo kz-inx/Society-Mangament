@@ -14,9 +14,15 @@ from rest_framework.generics import ListAPIView, get_object_or_404
 class UserFileCompliant(APIView):
     """
     Creating the views for file compliant for particular user ...
+     client should be login into the system for using this service
+    Request Post:
+        HTTP.Request
+        This method will post the given data into the database
+        It will also notify the user and as well as admin of the system via email.
+    Return Objects:
+        It will return msg in json format if will request successfully placed or it will rase error exception
     """
     permission_classes = [IsAuthenticated]
-
     def post (self, request):
         serializer = UserFileCompliantSerializers(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -44,6 +50,8 @@ class UserFileCompliant(APIView):
 class SeeCompliantViews(ListAPIView):
     """
     Creating the endpoint to the see the complaints has been filled...
+    admin of the system can use this service. If any be one else than admin use access this endpoint it will raise error
+     It will show all present complain into the system whose status is false into the system.
      """
     permission_classes = [IsAdminUser]
 
@@ -58,7 +66,15 @@ class SeeCompliantViews(ListAPIView):
 
 class AdminUpdateStatusCompliant(APIView):
     """
-    Creating class view for the admin to solve the compliant of society member
+    Creating class view for the admin to solve the compliant of society member.
+    only admin of the system can use this endpoint any one else being will go to use it will raise the error in the system
+    Request Post:
+        HTTP.Request
+        It will take the compliant the id and update the status on it.
+        Is also go update the status of compliant has been solved to user via email.
+    Return Objects:
+        It will return the success msg in format of json and show to user
+        or IF complain resolve or not available into the system it will raise the error msg and display in json format
     """
     permission_classes = [IsAdminUser]
     def post(self,request):

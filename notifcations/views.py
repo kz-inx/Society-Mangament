@@ -15,6 +15,14 @@ from resident.models import UserRole
 class AdminSentNotifcationAll(APIView):
     """
      Send Notifications to all user in the system
+     admin of the system should login into the system if any else try it will go throw error msg
+     Request Post:
+        Http Request
+        admin need passes the subject and message to the system
+    Response Objects:
+        if everything goes ok user will notify by the mail the new notifications
+        if anything's fails it will raise exception the error and show msg in the form json data
+        it will send notifications to all user of the system
      """
     permission_classes = [IsAdminUser]
 
@@ -38,6 +46,14 @@ class AdminSentNotifcationAll(APIView):
 class AdminSentNotifcationParticular(APIView):
     """
     Send notifications to particular user in the system
+    admin of the system should log in into the system if any else try it will go throw error msg
+     Request Post:
+        Http Request
+        admin need passes the subject and message to the system
+    Response Objects:
+        if everything goes ok user will notify by the mail the new notifications
+        if anything's fails it will raise exception the error and show msg in the form json data
+        it will send notifications to particular user of the system
     """
     permission_classes = [IsAdminUser]
 
@@ -60,7 +76,10 @@ class AdminSentNotifcationParticular(APIView):
 
 class SeeNotifcation(ListAPIView):
     """
-     See notification by the user on there particular endpoint
+     user will be see the notifcation into the system
+     User should be login into the system before accessing this endpoints
+     User will be able to see all notifications of that he/she received into the system
+     the notifications shows to user on descending order manner
      """
     permission_classes = [IsAuthenticated]
     queryset = Notifcation.objects.all()

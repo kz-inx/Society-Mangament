@@ -29,20 +29,16 @@ def get_tokens_for_user(user):
 class UserRegistrationView(APIView):
     """
     Creating a class view for regstration to the new user into our system
+       Accepts the post request into the system
+    Request:
+        Http Request will there
+        it will contain all the data required in the model and stored into database
+    Returns:
+            Request.objects
+            if all value are corrected new account will create of user show success msg in the form of json format
+            if anything goes wrong system throw the error in the form of json
     """
     def post(self, request, fromat=None):
-        """
-        Accepts the post request into the system
-
-        Request:
-        Http Request will there
-        it will contain all the data required in the model
-
-        Returns:
-            Request.objects
-            if all value are corrected new account will create of user
-            if anything goes wrong system throw the error
-        """
         commonserializer = UserRegistrationSerializer(data=request.data.get("commondata"))
         if commonserializer.is_valid(raise_exception=True):
             user = commonserializer.save()
@@ -60,22 +56,18 @@ class UserRegistrationView(APIView):
 class StaffRegistrationView(APIView):
     """
     Creating a class view for regstration to the new staff role into your system....
+    there only admin of the system has permission to perform this operation into the system
+    Accepted the post request into the system
+    Request:
+        Http Request will there
+        it will contain all the data required in the model and stored into the database into the system
+    Returns:
+            Request. Objects
+            if all value are corrected new account will create of staff show success msg in format json
+            if anything goes wrong system throw the error and going failure msg in the format json
     """
     permission_classes = [IsAdminUser]
-    """
-    there only admin of the system has permission to perform this operation into the system 
-    """
     def post(self, request, fromat=None):
-        """
-        Accepted the post request into the system
-          Request:
-        Http Request will there
-        it will contain all the data required in the model
-        Returns:
-            Request. Objects
-            if all value are corrected new account will create of staff
-            if anything goes wrong system throw the error
-        """
         commonserializer = UserRegistrationSerializer(data=request.data.get("commondata"))
         if commonserializer.is_valid(raise_exception=True):
             user = commonserializer.save()
@@ -97,8 +89,7 @@ class LoginIntoSystem(APIView):
 
     Request:
         Http Request will there
-        it will contain all the data required in the model
-
+        it will contain all the data required in the model. They need to enter email id and password
     Return:
         Request. Object
         it will request by the client
@@ -136,18 +127,19 @@ class LoginIntoSystem(APIView):
 class UserChangePasswordView(APIView):
     """
     User change password by providing the necessary details
+     client should be verified with his credentials use this feature
+    Request Post:
+        Http.Request
+        User need login to perform this action and enter data need
+    Return:
+        return.object
+        the user password will  be change into the system based on role is classified into the system is staff or user
+        if user it will show success msg in the form of the json data,
+        if its staff going to check its first time or not, its first time it will true status of change password and
+        show success msg in the form of the json data.
+        Or else It will raise error and show in the form of json data.
     """
     permission_classes = [IsAuthenticated]
-    """
-    client should be verify with his credentials use this feature
-    
-    Request Post: 
-        Http.Request 
-        User need login to perform this action 
-    Return:
-        return.object 
-        the user password will  be change into the system based on role is classified into the system is staff or user 
-    """
     def post(self, request, format=None):
         current_user = request.user
         print(current_user)
@@ -205,18 +197,16 @@ class PasswordResetConfirm(ResetPasswordConfirm):
 class UserProfileView(APIView):
     """
     the user of the system will be able to see his whole profile into the system
-    """
-    permission_classes = [IsAuthenticated]
-    """
-    client need to be authenticated into the system 
-    
+     client need to be authenticated into the system
+
     Request Get:
-        Http.Request 
+        Http.Request
         It will classify based on user login it show profile its staff or its user
     Return:
-        Return.objects 
-        it will return the whole profile information about the users into the system 
+        Return.objects
+        it will return the whole profile information about the users into the system
     """
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         current_user = request.user
         try:
@@ -232,10 +222,18 @@ class UserProfileView(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AdminBlockUser(APIView):
-    permission_classes = [IsAdminUser]
     """
     Block the user or staff in the system
+    only admin of the system can perform this operation no-one else has right performed  this operation, or it will raise error
+    Request Post:
+        HTTP.Request
+        Admin need block user id and enter into the format of json data
+    Response:
+        Response.objects:
+        if user is found it will block the user show success msg to the user in form the json data
+        if user is already blocked or user is admin of the system then it will show error msg in the form of json data
     """
+    permission_classes = [IsAdminUser]
     def post(self,request):
         user_id = request.data.get('id')
         user_block = User.objects.filter(id=user_id).first()
@@ -251,7 +249,14 @@ class AdminBlockUser(APIView):
 class NewAdminInSystem (APIView):
     permission_classes = [IsAdminUser]
     """
-    Block the user or staff in the system
+    Create the new admin into the system 
+    only admin of the system has permission to do this or any one else try do this it will raise error msg 
+    Request post:
+        HTTP.Request
+        client need enter the user_id for given admin rights to other user 
+    Response Objects:
+        If id is true admin access will given and show success msg in the form json data 
+        if is already admin or user block into the system it will going to raise the error msg into the system
     """
     def post(self,request):
         user_id = request.data.get('id')
@@ -266,11 +271,16 @@ class NewAdminInSystem (APIView):
             user_block.save()
             return Response({'status': 'Pass', 'msg': NewAdminSystem},status=status.HTTP_200_OK)
 
-
-
 class AdminDeleteUser(DestroyAPIView):
     """
-    Admin will delte the user perament from the
+    Admin will delete the user permanent from the
+    only admin of the system has right to perform this opeartion or anyone else try to this it will show error msg into the system.
+    Request Delete:
+        Http.Request
+        admin needs user_id for delete user from the system permanently
+    Response Objects:
+        It will show the success msg after delete user into the system
+        if user id not get or user is admin of the system is not able to delete it and raise error msg into the form json
     """
     permission_classes = [IsAdminUser]
     serializer_class = AdminDeleteUserSerializers
@@ -286,6 +296,8 @@ class AdminDeleteUser(DestroyAPIView):
 class AdminSeeAllStaff(ListAPIView):
     """
     Admin Will see all details of the staff register into the system
+    only admin can access this endpoint or any else try do this it will raise the error msg
+    It will go to show all staff register details into the system and there necessary information
     """
     permission_classes = [IsAdminUser]
     queryset = StaffRole.objects.all()
@@ -294,6 +306,8 @@ class AdminSeeAllStaff(ListAPIView):
 class AdminSeeAllUser(ListAPIView):
     """
     Admin Will see all details of the user register into the system
+    only admin can access this endpoint or any else try do this it will raise the error msg
+    It will go to show all user register details into the system and there necessary information
     """
     permission_classes = [IsAdminUser]
     queryset = UserRole.objects.all()

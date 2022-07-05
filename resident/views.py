@@ -9,12 +9,14 @@ from .serializers import UserListSerializer, UserPayMaintenanceSerializers, Admi
 from .models import UserRole, UserPayMaintenance
 from .message import UserNotGiven, UserStatus, UserAlreadyVerified, SuccessfullyPaid, ErrorOccur, AlreadyPaid, NotUser
 import stripe
+from django.shortcuts import render
 
 stripe.api_key = 'sk_test_51LHhAgSFfGW1sF18frp7b8yqNOVyHwkSgzxvfT8aHgugxQxcoChSxVud8Sg6lzJZB55ZkezAFWTqPpE9l855D8GN00ovX9Egb8'
 
 
 class UserListView(ListAPIView):
     """
+    Admin of the system has only accessed no other one try to call this else error will raise into the system
     Admin will see user whose status is_verified is false
     """
     permission_classes = [IsAdminUser]
@@ -29,6 +31,13 @@ class UserListView(ListAPIView):
 class UserStatusUpdate(APIView):
     """
     Admin will update the status and give the permission to the user access the application
+    admin of system is able be use this feature no one else has right to perform this operation into the system
+    Request Post:
+        Http Request
+        Admin need the user_id for the updating the status of user into the system
+    Response Objects:
+        if everything will goes ok status will update and show success msg to the admin
+        if error is raise any type it will going to raise exception and error msgs
     """
     permission_classes = [IsAdminUser]
 
@@ -48,6 +57,13 @@ class UserStatusUpdate(APIView):
 class UserPayMaintance(APIView):
     """
     User will the pay the maintenance of the society using the endpoint
+    user need login into the system to access this endpoint.
+    Request Post:
+        HTTP.Request
+        amount of maintance to the user will display he/she needs pay it
+    Request Objects:
+        if everything goes okk user pay it and system will show success msg to the user
+        if anything found wrong error rise into the system and display to the user
     """
     permission_classes = [IsAuthenticated]
     query_set = UserPayMaintenance.objects.all()
@@ -102,6 +118,12 @@ class UserPayMaintance(APIView):
 class AdminCanSeeAllRecordsMaintance(APIView):
     """
     Admin will see all the records the related to the user pay maintenance into the system
+    only admin of the system is has permission to the see user records any else try to this it will show directly error msg
+    Request get:
+        HTTP Request
+        admin need enter month into the system for classfiy the query
+    Response Objects:
+        Admin will be able to see particular month records into the system
     """
     permission_classes = [IsAdminUser]
 
@@ -112,3 +134,6 @@ class AdminCanSeeAllRecordsMaintance(APIView):
         # queryset = UserPayMaintenance.objects.all().order_by('-pay_date')
         serializer = AdminSeeAllMaintenanceRecordsSerializers(data, many=True)
         return Response({'status': 'pass', 'data': serializer.data}, status=status.HTTP_200_OK)
+
+def success(request):
+    return render(request,'success.html')
