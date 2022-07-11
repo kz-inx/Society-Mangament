@@ -18,5 +18,4 @@ class UserPayMaintenance(models.Model):
     is_complete_pay = models.BooleanField(default=False)
 
 class AmountPayMaintenance(models.Model):
-    amount_pay = models.IntegerField()
-    fine_pay = models.IntegerField()
+    amount_pay = models.CharField(max_length=10)
