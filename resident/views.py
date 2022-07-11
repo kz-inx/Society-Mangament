@@ -89,13 +89,14 @@ class UserPayMaintance(APIView):
                 data['house_no'] = user_house
                 data['is_complete_pay'] = True
                 amount_mqintenance = AmountPayMaintenance.objects.all().only("amount_pay").first()
-                if currentday >= 15:
-                    peresent_day = currentday - 15
+                if currentday >= 5:
+                    peresent_day = currentday - 5
                     fine_amount = peresent_day * 100
                     print(fine_amount)
                     amount_pay = fine_amount+amount_mqintenance.amount_pay
                 else:
                     amount_pay=amount_mqintenance.amount_pay
+
                 data['amount_pay']= amount_pay
                 queryset = UserPayMaintenance.objects.filter(house_no=user_house, pay_date__month=currentMonth,
                                                              pay_date__year=currentYear).first()
