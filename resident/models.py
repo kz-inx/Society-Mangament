@@ -15,3 +15,8 @@ class UserPayMaintenance(models.Model):
     house_no = models.CharField(max_length=10)
     amount_pay = models.CharField(max_length=12)
     pay_date = models.DateTimeField(default=timezone.now)
+    is_complete_pay = models.BooleanField(default=False)
+
+class AmountPayMaintenance(models.Model):
+    amount_pay = models.IntegerField()
+    fine_pay = models.IntegerField()

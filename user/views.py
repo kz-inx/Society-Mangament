@@ -1,3 +1,4 @@
+""" Importing libraries """
 from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm
 from rest_framework.response import Response
 from rest_framework import status
@@ -39,14 +40,17 @@ class UserRegistrationView(APIView):
             if anything goes wrong system throw the error in the form of json
     """
     def post(self, request, fromat=None):
-        commonserializer = UserRegistrationSerializer(data=request.data.get("commondata"))
+        commonserializer = UserRegistrationSerializer(data=request.data)
         if commonserializer.is_valid(raise_exception=True):
+            print("in serializers........sss")
             user = commonserializer.save()
-            request.data['user'] = user
-            userserializer = UserDataEnter(data=request.data.get("userdata"))
+            data = request.data.copy()
+            data['user'] = user
+            userserializer = UserDataEnter(data=data)
             if userserializer.is_valid(raise_exception=True):
                 user = userserializer.save(user=user)
                 token = get_tokens_for_user(user)
+                print(token)
                 return Response(
                     {'Status': "Okk", 'access': token['access'], 'refresh': token['refresh'], 'msg': UserRegstration},
                     status=status.HTTP_201_CREATED)
@@ -247,7 +251,7 @@ class AdminBlockUser(APIView):
             return Response({'status':'Pass','msg':UserBlock},status=status.HTTP_200_OK)
 
 class NewAdminInSystem (APIView):
-    permission_classes = [IsAdminUser]
+    # permission_classes = [IsAdminUser]
     """
     Create the new admin into the system 
     only admin of the system has permission to do this or any one else try do this it will raise error msg 

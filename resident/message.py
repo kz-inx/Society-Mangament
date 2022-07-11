@@ -15,3 +15,5 @@ ErrorOccur = "Something went to wrong"
 AlreadyPaid = " you have already paid maintenance. Please Verify into your system.."
 
 NotUser = "Your are not user or login with proper creditanls "
+
+AmountUpdate = "Amount Maintenance Pay Has Been Update Successfully into the system"

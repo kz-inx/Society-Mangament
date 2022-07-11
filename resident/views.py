@@ -1,15 +1,23 @@
 """ Importing Libraries """
+import os
 from datetime import datetime
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from .serializers import UserListSerializer, UserPayMaintenanceSerializers, AdminSeeAllMaintenanceRecordsSerializers
-from .models import UserRole, UserPayMaintenance
-from .message import UserNotGiven, UserStatus, UserAlreadyVerified, SuccessfullyPaid, ErrorOccur, AlreadyPaid, NotUser
+from societymangament import settings
+from .serializers import UserListSerializer, UserPayMaintenanceSerializers, \
+    AdminSeeAllMaintenanceRecordsSerializers, AdminUpdateAmountMiantanceSerializers
+from .models import UserRole, UserPayMaintenance, AmountPayMaintenance
+from .message import UserNotGiven, UserStatus, UserAlreadyVerified, SuccessfullyPaid, ErrorOccur, AlreadyPaid, NotUser, \
+    AmountUpdate
 import stripe
 from django.shortcuts import render
+from dotenv import load_dotenv
+load_dotenv()
 
 stripe.api_key = 'sk_test_51LHhAgSFfGW1sF18frp7b8yqNOVyHwkSgzxvfT8aHgugxQxcoChSxVud8Sg6lzJZB55ZkezAFWTqPpE9l855D8GN00ovX9Egb8'
 
@@ -71,21 +79,53 @@ class UserPayMaintance(APIView):
     def post(self, request):
         current_user = request.user
         data = request.data.copy()
-        print(data)
         try:
             user_role = UserRole.objects.get(user=current_user)
-            print(f"User Role:- {user_role}")
             if user_role:
                 currentMonth = datetime.now().month
                 currentYear = datetime.now().year
+                currentday = datetime.now().day
                 user_house = user_role.house_no
                 data['house_no'] = user_house
+                data['is_complete_pay'] = True
+                amount_mqintenance = AmountPayMaintenance.objects.all().only("amount_pay").first()
+                if currentday >= 15:
+                    peresent_day = currentday - 15
+                    fine_amount = peresent_day * 100
+                    print(fine_amount)
+                    amount_pay = fine_amount+amount_mqintenance.amount_pay
+                else:
+                    amount_pay=amount_mqintenance.amount_pay
+                data['amount_pay']= amount_pay
                 queryset = UserPayMaintenance.objects.filter(house_no=user_house, pay_date__month=currentMonth,
                                                              pay_date__year=currentYear).first()
                 if queryset is None:
                     serializers = UserPayMaintenanceSerializers(data=data)
+                    print(f"serial {serializers}")
                     if serializers.is_valid(raise_exception=True):
-                        payment_method = stripe.PaymentMethod.create(
+                        session = stripe.checkout.Session.create(
+                            payment_method_types=['card'],
+                            mode="subscription",
+                            line_items=[{
+                                'price_data': {
+                                    'currency': 'inr',
+                                    'recurring':{"interval": "month"},
+                                    'product_data': {
+                                        'name': 'pay',
+                                        "metadata": serializers.data,
+                                    },
+                                    'unit_amount': int(amount_pay) * 100,
+                                },
+                                'quantity': 1,
+                            }],
+                            # mode='subscription',
+                            success_url=f'{os.environ.get("url")}/api/resident/payment-success/',
+                            cancel_url=f'{os.environ.get("url")}/api/resident/payment-cancel/',
+                        )
+                        # print(f"Amount pay:- {serializers.data}")
+                        print(session.url)
+                        print(session.id)
+                        card_obj = stripe.PaymentMethod.create(
                             type="card",
                             card={
                                 "number": "4242424242424242",
@@ -94,22 +134,82 @@ class UserPayMaintance(APIView):
                                 "cvc": "314",
                             },
                         )
-                        print(payment_method.id)
                         customer = stripe.Customer.create(
-                            email=request.user.email, payment_method=payment_method.id
+                            email=request.user.email, payment_method=card_obj.id
                         )
-                        print(customer, "customer.........")
-                        stripe.PaymentIntent.create(
-                            customer=customer.id,
-                            payment_method=payment_method.id,
-                            currency='usd',
-                            amount=2500,
-                            confirm=True,
-                        )
-                        serializers.save()
-                        return Response({'status': 'pass', 'msg': SuccessfullyPaid}, status=status.HTTP_200_OK)
-                    return Response({'status': 'fail', 'msg': ErrorOccur}, status=status.HTTP_400_BAD_REQUEST)
+
+                        return JsonResponse({'id': session})
                 return Response({'status': 'fail', 'msg': AlreadyPaid}, status=status.HTTP_400_BAD_REQUEST)
+        except UserRole.DoesNotExist:
+            return Response({'status': 'fail', 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
+
+
+def success(request):
+    return render(request, 'success.html')
+
+
+def cancel(request):
+    return render(request, 'cancel.html')
+
+
+endpoint_secret = 'STRIPE_WEBHOOK_SECRET'
+
+
+# Using Django
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        # Invalid payload
+        return HttpResponse(status=201)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return HttpResponse(status=400)
+
+    # Handle the checkout.session.completed event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        payment_intent = stripe.checkout.Session.list(
+            payment_intent=session["payment_intent"],
+            expand=['data.line_items']
+        )
+        product_id = payment_intent['data'][0]['line_items']['data'][0]['price']['product']
+        product = stripe.Product.retrieve(product_id)
+        create_order(**product['metadata'])
+
+    return HttpResponse(status=200)
+
+
+def create_order(**data):
+    serializer = UserPayMaintenanceSerializers(data=data)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+
+
+class UserWillRedirectAfterPay(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        current_user = request.user
+        data = request.data.copy()
+        try:
+            user_role = UserRole.objects.get(user=current_user)
+            if user_role:
+                currentMonth = datetime.now().month
+                currentYear = datetime.now().year
+                user_house = user_role.house_no
+                queryset = UserPayMaintenance.objects.filter(house_no=user_house, pay_date__month=currentMonth,
+                                                             pay_date__year=currentYear).first()
+                if queryset and queryset.is_complete_pay:
+                    return Response({'status': 'pass', 'msg': SuccessfullyPaid}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'status': 'fail', 'msg': ErrorOccur}, status=status.HTTP_400_BAD_REQUEST)
 
         except UserRole.DoesNotExist:
             return Response({'status': 'fail', 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
@@ -135,5 +235,14 @@ class AdminCanSeeAllRecordsMaintance(APIView):
         serializer = AdminSeeAllMaintenanceRecordsSerializers(data, many=True)
         return Response({'status': 'pass', 'data': serializer.data}, status=status.HTTP_200_OK)
 
-def success(request):
-    return render(request,'success.html')
+class AdminUpdateAmountMiantance(APIView):
+    permission_classes = [IsAdminUser]
+    def put(self,request):
+        queryset = AmountPayMaintenance.objects.all().only("amount_pay").first()
+        amount_pay = request.data
+        serializers = AdminUpdateAmountMiantanceSerializers(queryset, data=amount_pay)
+        if serializers.is_valid(raise_exception=True):
+            serializers.save()
+            return Response({'status': 'pass`', 'msg': AmountUpdate}, status=status.HTTP_200_OK)
+        return Response({'status': 'fail', 'msg': AlreadyPaid}, status=status.HTTP_400_BAD_REQUEST)
+

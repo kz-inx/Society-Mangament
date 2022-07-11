@@ -1,6 +1,6 @@
 """ Importing Libraries"""
 from rest_framework import serializers
-from resident.models import UserRole, UserPayMaintenance
+from resident.models import UserRole, UserPayMaintenance, AmountPayMaintenance
 
 
 class UserDataEnter(serializers.ModelSerializer):
@@ -57,8 +57,12 @@ class UserPayMaintenanceSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = UserPayMaintenance
-        fields = ['house_no', 'amount_pay']
+        fields = ['house_no', 'amount_pay','is_complete_pay']
 
+class AdminUpdateAmountMiantanceSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = AmountPayMaintenance
+        fields = ['amount_pay']
 
 class AdminSeeAllMaintenanceRecordsSerializers(serializers.ModelSerializer):
     """

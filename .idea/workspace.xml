@@ -2,13 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="662fbcc0-bed0-4e08-8430-b14dc1c3acfd" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/resident/templates/cancel.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resident/templates/success.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compliant/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/compliant/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notifcations/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/notifcations/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resident/message.py" beforeDir="false" afterPath="$PROJECT_DIR$/resident/message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resident/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/resident/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resident/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/resident/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resident/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/resident/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resident/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/resident/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/staffresident/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/staffresident/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/societymangament/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/societymangament/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/tests.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/visitors/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/visitors/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,6 +25,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="HTML File" />
         <option value="Python Script" />
       </list>
     </option>
@@ -41,6 +49,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/kunal/societymangament&quot;,
