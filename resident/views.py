@@ -272,7 +272,9 @@ class UserWillRedirectAfterPay(APIView):
                 user_house = user_role.house_no
                 queryset = UserPayMaintenance.objects.filter(house_no=user_house, pay_date__month=currentMonth,
                                                              pay_date__year=currentYear).first()
+                print(queryset)
                 if queryset and queryset.is_complete_pay:
+                    print(queryset.is_complete_pay)
                     return Response({'status': 1, 'msg': SuccessfullyPaid}, status=status.HTTP_200_OK)
                 else:
                     return Response({'status': 0, 'msg': ErrorOccur}, status=status.HTTP_400_BAD_REQUEST)
