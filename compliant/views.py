@@ -44,7 +44,7 @@ class UserFileCompliant(APIView):
                 email_list,
                 fail_silently=False,
             )
-            return Response({'status': 'Successfully', 'msg': CompliantFile}, status=status.HTTP_201_CREATED)
+            return Response({'status': 1, 'msg': CompliantFile}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SeeCompliantViews(ListAPIView):
@@ -83,9 +83,9 @@ class AdminUpdateStatusCompliant(APIView):
         user = UserCompliant.objects.filter(id=compliant_id.id).first()
 
         if user is None:
-            return Response({'status':'Not available','msg':UserNotGiven},status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':0,'msg':UserNotGiven},status=status.HTTP_404_NOT_FOUND)
         elif user.status:
-            return Response({'status':'Already Solved','msg':UserAlreadyVerified},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':0,'msg':UserAlreadyVerified},status=status.HTTP_400_BAD_REQUEST)
         else:
             user.status = True
             user.save()
@@ -101,7 +101,7 @@ class AdminUpdateStatusCompliant(APIView):
                 fail_silently=False,
             )
 
-            return Response({'status':'Solved','msg':CompliantStatus}, status=status.HTTP_200_OK)
+            return Response({'status':1,'msg':CompliantStatus}, status=status.HTTP_200_OK)
 
 
 

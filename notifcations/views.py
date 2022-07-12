@@ -39,7 +39,7 @@ class AdminSentNotifcationAll(APIView):
                 email_list,
                 fail_silently=False,
             )
-            return Response({'status':'Successfully','msg': SentNotifcation}, status=status.HTTP_201_CREATED)
+            return Response({'status':1,'msg': SentNotifcation}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -71,7 +71,7 @@ class AdminSentNotifcationParticular(APIView):
                 email_list,
                 fail_silently=False,
             )
-            return Response({'status':'Successfully','msg': SentParticularUser}, status=status.HTTP_201_CREATED)
+            return Response({'status':1,'msg': SentParticularUser}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SeeNotifcation(ListAPIView):

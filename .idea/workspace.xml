@@ -3,8 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="662fbcc0-bed0-4e08-8430-b14dc1c3acfd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resident/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/resident/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/compliant/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/compliant/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notifcations/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/notifcations/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resident/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/resident/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resident/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/resident/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/staffresident/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/staffresident/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/visitors/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/visitors/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

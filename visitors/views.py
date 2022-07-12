@@ -53,13 +53,13 @@ class AdminSentNotifcationParticular(APIView):
                         email_list,
                         fail_silently=False,
                     )
-                    return Response({'status': 'Successfully', 'msg': VerfiyVistiors}, status=status.HTTP_201_CREATED)
+                    return Response({'status': 1, 'msg': VerfiyVistiors}, status=status.HTTP_201_CREATED)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({'status': 'Fail', 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0, 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
 
         except StaffRole.DoesNotExist:
-            return Response({'status': 'fail', 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0, 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SeeVisitors(ListAPIView):
@@ -89,7 +89,7 @@ class SeeVisitors(ListAPIView):
                 return Response({'data': serialized_data.data})
         except Exception as e:
             print(e, type(e))
-            return Response({'status': 'fail', 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0, 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateStatusVisitors(APIView):
@@ -132,16 +132,16 @@ class UpdateStatusVisitors(APIView):
                         fail_silently=False,
                     )
                     if visitor is None:
-                        return Response({'status': 'Not available', 'msg': VistiorsNotAvailable},
+                        return Response({'status': 0, 'msg': VistiorsNotAvailable},
                                         status=status.HTTP_404_NOT_FOUND)
                     else:
-                        return Response({'status': 'Solved', 'msg': VisitorsStatus}, status=status.HTTP_200_OK)
+                        return Response({'status': 1, 'msg': VisitorsStatus}, status=status.HTTP_200_OK)
                 else:
                     return Response({'status': 'Not available', 'msg': VisitorIsAllAlreadyVerfied},
                                     status=status.HTTP_404_NOT_FOUND)
 
         except UserRole.DoesNotExist:
-            return Response({'status': 'fail', 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0, 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class StaffSeeAllVisitors(APIView):
@@ -169,10 +169,10 @@ class StaffSeeAllVisitors(APIView):
                 queryset = VisitorsSociety.objects.filter(date_posted__gte=week_ago)
                 serialized_data = StaffSeeAllVisitorsSerializers(queryset, many=True)
                 return Response({'data': serialized_data.data})
-            return Response({'status': 'Fail', 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0, 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
 
         except StaffRole.DoesNotExist:
-            return Response({'status': 'fail', 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0, 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserSeeAllVisitors(APIView):
@@ -202,7 +202,7 @@ class UserSeeAllVisitors(APIView):
                 serialized_data = UserSeeAllVisitorsSerializers(queryset, many=True)
                 return Response({'data': serialized_data.data})
         except UserRole.DoesNotExist:
-            return Response({'status': 'fail', 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0, 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DailyVisitorsRegister(APIView):
@@ -221,8 +221,8 @@ class DailyVisitorsRegister(APIView):
         serializer = DailyVistiorsSerializers(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response({'status': 'Pass', 'msg': VisitorsRegstration}, status=status.HTTP_201_CREATED)
-        return Response({'status': 'fail', 'msg': VisitorsRegstrationFail}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 1, 'msg': VisitorsRegstration}, status=status.HTTP_201_CREATED)
+        return Response({'status': 0, 'msg': VisitorsRegstrationFail}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DailyVisitorsVerify(APIView):
@@ -246,10 +246,10 @@ class DailyVisitorsVerify(APIView):
                 daily_visitor_query = get_object_or_404(DailyVisitorsSociety, serial_id=serial_id)
                 serializer = StaffVerifyDailyVisitors(daily_visitor_query)
                 return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-            return Response({'status': 'Fail', 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0, 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
 
         except StaffRole.DoesNotExist:
-            return Response({'status': 'fail', 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 1, 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
 
 class AdminSeeDailyVisitors(ListAPIView):
     """
