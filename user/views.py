@@ -71,11 +71,12 @@ class StaffRegistrationView(APIView):
     """
     permission_classes = [IsAdminUser]
     def post(self, request, fromat=None):
-        commonserializer = UserRegistrationSerializer(data=request.data.get("commondata"))
+        commonserializer = UserRegistrationSerializer(data=request.data)
         if commonserializer.is_valid(raise_exception=True):
             user = commonserializer.save()
-            request.data['user'] = user
-            staffserializer = StaffData(data=request.data.get("staffdata"))
+            data = request.data.copy()
+            data['user'] = user
+            staffserializer = StaffData(data=request.data)
             if staffserializer.is_valid(raise_exception=True):
                 user = staffserializer.save(user=user)
                 token = get_tokens_for_user(user)
@@ -83,7 +84,7 @@ class StaffRegistrationView(APIView):
                     {'Status': 1, 'access': token['access'], 'refresh': token['refresh'], 'msg': UserRegstration},
                     status=status.HTTP_201_CREATED)
             return Response({'Status': 0, "msg": UserWrong}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'Status': 0, "msg": UserWrong}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'Status': 0, "msg": UserWrong}, status=status.HTTP_409_CONFLICT_BAD_REQUEST)
 
 class LoginIntoSystem(APIView):
     """
@@ -117,15 +118,14 @@ class LoginIntoSystem(APIView):
                 status=status.HTTP_200_OK)
         except:
             print("Not staff")
-
-        user_verified = user_auth.user_data.get()
-        if not user_verified.is_verfied:
-            return Response({'status': 0, 'msg': UserNotVerified}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            token = get_tokens_for_user(user_auth)
-            return Response(
-                {'status': 1, 'access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
-                status=status.HTTP_200_OK)
+        if not user_auth.is_admin:
+            user_verified = user_auth.user_data.get()
+            if not user_verified.is_verfied:
+                return Response({'status': 0, 'msg': UserNotVerified}, status=status.HTTP_400_BAD_REQUEST)
+        token = get_tokens_for_user(user_auth)
+        return Response(
+            {'status': 1, 'access': token['access'], 'refresh': token['refresh'], 'msg': UserLogin},
+            status=status.HTTP_200_OK)
 
 class UserChangePasswordView(APIView):
     """

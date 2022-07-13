@@ -10,7 +10,7 @@ UserStatus = "Changed Status of the user..."
 
 SuccessfullyPaid = "You had pay your maintenance successfully. Thank you for using this system"
 
-ErrorOccur = "Something went to wrong"
+ErrorOccur = "You Had Not May be paid this month maintenance"
 
 AlreadyPaid = " you have already paid maintenance. Please Verify into your system.."
 

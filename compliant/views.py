@@ -23,7 +23,7 @@ class UserFileCompliant(APIView):
         It will return msg in json format if will request successfully placed or it will rase error exception
     """
     permission_classes = [IsAuthenticated]
-    def post (self, request):
+    def post(self, request):
         serializer = UserFileCompliantSerializers(data=request.data)
         if serializer.is_valid(raise_exception=True):
             instance = serializer.save(user=request.user)

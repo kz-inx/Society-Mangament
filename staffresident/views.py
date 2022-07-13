@@ -35,5 +35,5 @@ class RoleRegistrationView(APIView):
         if serializer.is_valid(raise_exception=True):
             role = serializer.save()
             role.save()
-            return Response({"status":1,'msg':NewRole }, status=status.HTTP_201_CREATED)
+            return Response({"status":1,'msg':NewRole, 'id':role.id }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -52,7 +52,7 @@ class UserStatusUpdate(APIView):
     def post(self, request, format=None):
         user_id = request.data.get('id')
         user = UserRole.objects.filter(id=user_id).first()
-        if user is None:
+        if not user :
             return Response({'status': 0, 'msg': UserNotGiven}, status=status.HTTP_404_NOT_FOUND)
         elif user.is_verfied:
             return Response({'status': 0, 'msg': UserAlreadyVerified}, status=status.HTTP_400_BAD_REQUEST)
@@ -69,7 +69,7 @@ class UserNormalPayMaintance(APIView):
     Request Post:
         HTTP.Request
         amount of maintance to the user will display he/she needs pay it
-    Request Objects:
+    Requests Objects:
         if everything goes okk user pay it and system will show success msg to the user
         if anything found wrong error rise into the system and display to the user
     """
@@ -249,6 +249,11 @@ def stripe_webhook(request):
         product = stripe.Product.retrieve(product_id)
         print(product, "productproductproductproductproductproduct")
         create_order(**product['metadata'])
+        print(f"create_order {create_order}")
+    print(event['type'])
+    if event['type'] == 'payment_intent.succeeded':
+        session = event['data']['object']
+        create_order(**session['metadata'])
     return HttpResponse(status=200)
 
 
@@ -259,6 +264,14 @@ def create_order(**data):
 
 
 class UserWillRedirectAfterPay(APIView):
+    """
+    After user will pay through payment gateway.User can hit this api check here payment successfully added into the system
+    Request get:
+        HTTP.Request
+    Response Objects:
+        If user had paid the maintenance then it will show him success msg or not paid it will show him error msg
+        IF any other role login into the system then error exception handel raise
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -277,7 +290,8 @@ class UserWillRedirectAfterPay(APIView):
                     print(queryset.is_complete_pay)
                     return Response({'status': 1, 'msg': SuccessfullyPaid}, status=status.HTTP_200_OK)
                 else:
-                    return Response({'status': 0, 'msg': ErrorOccur}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'status': 0, 'msg':ErrorOccur
+                                     }, status=status.HTTP_400_BAD_REQUEST)
 
         except UserRole.DoesNotExist:
             return Response({'status': 0, 'msg': NotUser}, status=status.HTTP_400_BAD_REQUEST)
@@ -304,6 +318,14 @@ class AdminCanSeeAllRecordsMaintance(APIView):
         return Response({'status': 1, 'data': serializer.data}, status=status.HTTP_200_OK)
 
 class AdminUpdateAmountMiantance(APIView):
+    """
+    Admin of the system can update the maintenance of the system it will go update request into the system
+    Request Put:
+        Http.Put
+        admin need new amount pay into thr system
+    Response Objects:
+        If amount update success admin will return with success msg or error raise it will show error msg
+    """
     permission_classes = [IsAdminUser]
     def put(self,request):
         queryset = AmountPayMaintenance.objects.all().only("amount_pay").first()

@@ -28,11 +28,12 @@ class MyUserManager(BaseUserManager):
         """
         user = self.create_user(
             email,
+            name,
             password=password,
-            name=name,
         )
         user.is_admin = True
         user.is_verified = True
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
