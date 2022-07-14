@@ -84,7 +84,7 @@ class StaffRegistrationView(APIView):
                     {'Status': 1, 'access': token['access'], 'refresh': token['refresh'], 'msg': UserRegstration},
                     status=status.HTTP_201_CREATED)
             return Response({'Status': 0, "msg": UserWrong}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'Status': 0, "msg": UserWrong}, status=status.HTTP_409_CONFLICT_BAD_REQUEST)
+        return Response({'Status': 0, "msg": UserWrong}, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginIntoSystem(APIView):
     """
@@ -155,7 +155,6 @@ class UserChangePasswordView(APIView):
                     staff_role.change_password = True
                     staff_role.save()
                     return Response({'status': 1,'msg': StaffChangePassword}, status=status.HTTP_200_OK)
-
                 return Response({'status': 1,'msg': StaffChangePasswordAnother}, status=status.HTTP_200_OK)
 
         except StaffRole.DoesNotExist:
