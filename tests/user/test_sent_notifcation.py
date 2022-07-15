@@ -1,8 +1,11 @@
 import pytest
+from notifcations.models import Notifcation
 from resident.models import UserRole
+from django.core import mail
+
 
 @pytest.mark.django_db
-def test_user_password_change(Normaluser,super_auth_client,client):
+def test_user_email_sent_all(Normaluser,super_auth_client,client):
     user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
     payload = {
         "id":user.id
@@ -15,16 +18,18 @@ def test_user_password_change(Normaluser,super_auth_client,client):
     }
     response=client.post("/api/user/login/", payload)
     assert response.status_code == 200
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + response.data['access'])
+    email_list = ['kunalzaveri11@gmail.com','kz251199@gmail.com']
     payload = {
-        "password":"Kunal@123",
-        "password2":"Kunal@123"
+        "title": "Pay maintance",
+        "message": "Pay your maintance before the dateline..."
     }
-    response = client.post("/api/user/change-password/", payload)
-    assert response.status_code == 200
+    response = super_auth_client.post("/api/notify/sendall/", payload)
+    assert response.status_code == 201
+    assert 1 == len(mail.outbox)
+    assert mail.outbox[0].subject, 'Pay maintance'
 
 @pytest.mark.django_db
-def test_user_password_change_fail(Normaluser,super_auth_client,client):
+def test_user_email_sent_fail_all(Normaluser,super_auth_client,client):
     user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
     payload = {
         "id":user.id
@@ -37,16 +42,16 @@ def test_user_password_change_fail(Normaluser,super_auth_client,client):
     }
     response=client.post("/api/user/login/", payload)
     assert response.status_code == 200
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + response.data['access'])
+    email_list = ['kunalzaveri11@gmail.com','kz251199@gmail.com']
     payload = {
-        "password":"Kunal@23",
-        "password2":"Kunal@123"
+
     }
-    response = client.post("/api/user/change-password/", payload)
+    response = super_auth_client.post("/api/notify/sendall/", payload)
     assert response.status_code == 400
+    assert 0 == len(mail.outbox)
 
 @pytest.mark.django_db
-def test_user_password_same_change_fail(Normaluser,super_auth_client,client):
+def test_user_email_sent_ind(Normaluser,super_auth_client,client):
     user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
     payload = {
         "id":user.id
@@ -59,53 +64,36 @@ def test_user_password_same_change_fail(Normaluser,super_auth_client,client):
     }
     response=client.post("/api/user/login/", payload)
     assert response.status_code == 200
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + response.data['access'])
+    email_list = ['kunalzaveri11@gmail.com']
     payload = {
-        "password":"Kunal123",
-        "password2":"Kunal123"
+        "title": "Pay maintance",
+        "message": "Pay your maintance before the dateline...",
+        "house_no":104
     }
-    response = client.post("/api/user/change-password/", payload)
+    response = super_auth_client.post("/api/notify/sendoneuser/", payload)
+    assert response.status_code == 201
+    assert 1 == len(mail.outbox)
+    assert mail.outbox[0].subject, 'Pay maintance'
+
+@pytest.mark.django_db
+def test_user_email_sent_ind_fail(Normaluser,super_auth_client,client):
+    user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
+    payload = {
+        "id":user.id
+    }
+    response = super_auth_client.post("/api/resident/user-status/", payload)
+    assert response.status_code == 200
+    payload = {
+        "email":"kz251199@gmail.com",
+        "password":"Kunal@123"
+    }
+    response=client.post("/api/user/login/", payload)
+    assert response.status_code == 200
+    email_list = ['kunalzaveri11@gmail.com']
+    payload = {
+
+    }
+    response = super_auth_client.post("/api/notify/sendoneuser/", payload)
     assert response.status_code == 400
+    assert 0 == len(mail.outbox)
 
-@pytest.mark.django_db
-def test_user_password_cap_check_pass(Normaluser,super_auth_client,client):
-    user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
-    payload = {
-        "id":user.id
-    }
-    response = super_auth_client.post("/api/resident/user-status/", payload)
-    assert response.status_code == 200
-    payload = {
-        "email":"kz251199@gmail.com",
-        "password":"Kunal@123"
-    }
-    response=client.post("/api/user/login/", payload)
-    assert response.status_code == 200
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + response.data['access'])
-    payload = {
-        "password":"kunal123",
-        "password2":"kunal123"
-    }
-    response = client.post("/api/user/change-password/", payload)
-    assert response.status_code == 400
-
-@pytest.mark.django_db
-def test_user_profile_seen(Normaluser,super_auth_client,client):
-    user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
-    payload = {
-        "id":user.id
-    }
-    response = super_auth_client.post("/api/resident/user-status/", payload)
-    assert response.status_code == 200
-    payload = {
-        "email":"kz251199@gmail.com",
-        "password":"Kunal@123"
-    }
-    response=client.post("/api/user/login/", payload)
-    assert response.status_code == 200
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + response.data['access'])
-    payload = {
-
-    }
-    response = client.get("/api/user/profile/", payload)
-    assert response.status_code == 200

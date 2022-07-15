@@ -67,7 +67,6 @@ def test_user_login_val(Normaluser,client):
     response = client.post("/api/user/login/", payload)
     assert response.status_code == 404
 
-
 @pytest.mark.django_db
 def test_user_verified(Normaluser,super_auth_client,client):
     user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
@@ -92,6 +91,67 @@ def test_user_verified_fail(Normaluser,super_auth_client,client):
     }
     response = super_auth_client.post("/api/resident/user-status/", payload)
     assert response.status_code == 400
+
+@pytest.mark.django_db
+def test_user_block_user(Normaluser,super_auth_client,client):
+    user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
+    payload = {
+        "id":user.id
+    }
+    response = super_auth_client.post("/api/resident/user-status/", payload)
+    assert response.status_code == 200
+    payload = {
+        "email":"kz251199@gmail.com",
+        "password":"Kunal@123"
+    }
+    response=client.post("/api/user/login/", payload)
+    assert response.status_code == 200
+    payload = {
+        "id":Normaluser.id
+    }
+    response = super_auth_client.post("/api/user/block-user/", payload)
+    assert response.status_code == 200
+
+@pytest.mark.django_db
+def test_user_block_user_fail(Normaluser,super_auth_client,client):
+    user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
+    payload = {
+        "id":user.id
+    }
+    response = super_auth_client.post("/api/resident/user-status/", payload)
+    assert response.status_code == 200
+    payload = {
+        "email":"kz251199@gmail.com",
+        "password":"Kunal@123"
+    }
+    response=client.post("/api/user/login/", payload)
+    assert response.status_code == 200
+    payload = {
+
+    }
+    response = super_auth_client.post("/api/user/block-user/", payload)
+    assert response.status_code == 400
+
+@pytest.mark.django_db
+def test_user_delete_user(Normaluser,super_auth_client,client):
+    user = UserRole.objects.create(user=Normaluser,is_verfied=False,house_no=104)
+    payload = {
+        "id":user.id
+    }
+    response = super_auth_client.post("/api/resident/user-status/", payload)
+    assert response.status_code == 200
+    payload = {
+        "email":"kz251199@gmail.com",
+        "password":"Kunal@123"
+    }
+    response=client.post("/api/user/login/", payload)
+    assert response.status_code == 200
+    payload = {
+        "id":Normaluser.id
+    }
+    response = super_auth_client.delete(f"/api/user/delete-user/{payload['id']}/")
+    assert response.status_code == 204
+
 
 
 
