@@ -31,12 +31,9 @@ class UserFileCompliant(APIView):
             user_query = UserRole.objects.filter(house_no=house_no).values("user")
             email_list = User.objects.filter(id__in=user_query).values_list('email', flat=True)
             email_list = [email for email in email_list]
-            # print(email_list)
             email_admin = User.objects.filter(is_admin=True).values_list('email', flat=True)
             admin_email = [email for email in email_admin]
             email_list.extend(admin_email)
-            # email_list = chain(email_list, email_admin)
-            print(email_list)
             send_mail(
                 instance.title,
                 instance.subject,
@@ -44,7 +41,7 @@ class UserFileCompliant(APIView):
                 email_list,
                 fail_silently=False,
             )
-            return Response({'status': 1, 'msg': CompliantFile}, status=status.HTTP_201_CREATED)
+            return Response({'status': 1, 'msg': CompliantFile, "id": instance.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SeeCompliantViews(ListAPIView):
@@ -60,7 +57,6 @@ class SeeCompliantViews(ListAPIView):
 
     def get_queryset(self):
         queryset = UserCompliant.objects.filter(status=False)
-        print(f"QUERY SET {queryset}")
         return queryset
 
 
@@ -89,10 +85,10 @@ class AdminUpdateStatusCompliant(APIView):
         else:
             user.status = True
             user.save()
-            house_no = request.user.user_data.get().house_no
+            house_no = user.user.user_data.get().house_no
             user_query = UserRole.objects.filter(house_no=house_no).values("user")
+            print(user_query)
             email_list = User.objects.filter(id__in=user_query).values_list('email', flat=True)
-            print(email_list)
             send_mail(
                 "Compliant has been solved",
                 "Secretary of society has been solved your complain. This Message regarding you update the status of your compliant",
@@ -101,7 +97,7 @@ class AdminUpdateStatusCompliant(APIView):
                 fail_silently=False,
             )
 
-            return Response({'status':1,'msg':CompliantStatus}, status=status.HTTP_200_OK)
+            return Response({'status': 1, 'msg':CompliantStatus}, status=status.HTTP_200_OK)
 
 
 

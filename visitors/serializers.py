@@ -55,7 +55,6 @@ class DailyVistiorsSerializers(serializers.ModelSerializer):
         model = DailyVisitorsSociety
         fields = ['serial_id', 'name', 'phone_number', 'profile_pics', 'addharcard_number']
 
-
 class StaffVerifyDailyVisitors(serializers.ModelSerializer):
     """
     Sending Data to the staff verfiy the visitors of given ID

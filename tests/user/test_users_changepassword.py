@@ -109,3 +109,40 @@ def test_user_profile_seen(Normaluser,super_auth_client,client):
     }
     response = client.get("/api/user/profile/", payload)
     assert response.status_code == 200
+
+@pytest.mark.django_db
+def test_staff_paaword_change(super_auth_client, client):
+    payload = {
+        "rolename": "Watchman"
+    }
+    response = super_auth_client.post("/api/staff/register-role/", payload)
+    assert response.status_code == 201
+    payload = {
+        "email": "ramesh.inexture+azhar@gmail.com",
+        "name": "ramesh",
+        "password": "Kunal@123",
+        "role": response.data['id']
+    }
+    response = super_auth_client.post("/api/user/register-staff/", payload)
+    assert response.status_code == 201
+
+    payload = {
+        "email": "ramesh.inexture+azhar@gmail.com",
+        "password": "Kunal@123",
+    }
+    response = client.post("/api/user/login/", payload)
+    assert response.status_code == 200
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + response.data['access'])
+    payload ={
+        "password":"Kunal@1234",
+        "password2":"Kunal@1234"
+    }
+    response = client.post("/api/user/change-password/", payload)
+    assert response.status_code == 200
+    payload = {
+        "password": "Kunal@12345",
+        "password2": "Kunal@12345"
+    }
+    response = client.post("/api/user/change-password/", payload)
+    assert response.status_code == 200
+

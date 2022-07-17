@@ -42,21 +42,21 @@ class AdminSentNotifcationParticular(APIView):
                     staffaccount = StaffRole.objects.get(user=self.request.user)
                     notifcation = serializer.save(staff=staffaccount)
                     print(f"notifcation recieve {notifcation}")
-                    house_no = notifcation.house_no
-                    user_query = UserRole.objects.filter(house_no=house_no).values("user")
-                    email_list = User.objects.filter(id__in=user_query).values_list('email', flat=True)
-                    print(f"email_list:- {email_list}")
-                    send_mail(
-                        'Visitors Verify mail',
-                        notifcation.name,
-                        'EMAIL_USER',
-                        email_list,
-                        fail_silently=False,
-                    )
+                    # house_no = notifcation.house_no
+                    # user_query = UserRole.objects.filter(house_no=house_no).values("user")
+                    # email_list = User.objects.filter(id__in=user_query).values_list('email', flat=True)
+                    # print(f"email_list:- {email_list}")
+                    # send_mail(
+                    #     'Visitors Verify mail',
+                    #     notifcation.name,
+                    #     'EMAIL_USER',
+                    #     email_list,
+                    #     fail_silently=False,
+                    # )
                     return Response({'status': 1, 'msg': VerfiyVistiors}, status=status.HTTP_201_CREATED)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({'status': 0, 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0, 'msg': PasswordChangePending}, status=status.HTTP_400_BAD_REQUESTD)
 
         except StaffRole.DoesNotExist:
             return Response({'status': 0, 'msg': NotStaff}, status=status.HTTP_400_BAD_REQUEST)
