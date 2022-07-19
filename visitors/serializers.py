@@ -7,9 +7,6 @@ class VisitorsRegisterSerializers(serializers.ModelSerializer):
     """
     creating a serializers for the register visitors into the system
     """
-    staff = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
 
     class Meta:
         model = VisitorsSociety

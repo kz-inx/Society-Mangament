@@ -88,14 +88,17 @@ class UserNormalPayMaintance(APIView):
                 user_house = user_role.house_no
                 data['house_no'] = user_house
                 data['is_complete_pay'] = True
-                amount_mqintenance = AmountPayMaintenance.objects.all().only("amount_pay").first()
+                # amount_mqintenance = AmountPayMaintenance.objects.all().only("amount_pay").first()
+                amount_mqintenance = 2560
                 if currentday >= 5:
                     peresent_day = currentday - 5
                     fine_amount = peresent_day * 100
                     print(fine_amount)
-                    amount_pay = fine_amount+int(amount_mqintenance.amount_pay)
+                    # amount_pay = fine_amount+int(amount_mqintenance.amount_pay)
+                    amount_pay = fine_amount + int(amount_mqintenance)
                 else:
-                    amount_pay=int(amount_mqintenance.amount_pay)
+                    # amount_pay=int(amount_mqintenance.amount_pay)
+                    amount_pay = int(amount_mqintenance)
                 data['amount_pay']= amount_pay
                 queryset = UserPayMaintenance.objects.filter(house_no=user_house, pay_date__month=currentMonth,
                                                              pay_date__year=currentYear).first()
@@ -163,8 +166,10 @@ class UserSubscriptionPayMaintance(APIView):
                 user_house = user_role.house_no
                 data['house_no'] = user_house
                 data['is_complete_pay'] = True
-                amount_mqintenance = AmountPayMaintenance.objects.all().only("amount_pay").first()
-                amount_pay = int(amount_mqintenance.amount_pay)
+                # amount_mqintenance = AmountPayMaintenance.objects.all().only("amount_pay").first()
+                amount_mqintenance = 2560
+                # amount_pay = int(amount_mqintenance.amount_pay)
+                amount_pay = int(amount_mqintenance)
                 data['amount_pay']= amount_pay
                 print(f"Only pay:- {amount_pay}")
                 queryset = UserPayMaintenance.objects.filter(house_no=user_house, pay_date__month=currentMonth,

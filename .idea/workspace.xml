@@ -2,14 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="662fbcc0-bed0-4e08-8430-b14dc1c3acfd" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/user/test_compliant_file_user.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/user/test_vistior_reg_role.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/user/test_a_vistior_reg_role.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/user/test_pay_module.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compliant/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/compliant/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resident/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/resident/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/staffresident/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/staffresident/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/user/test_sent_notifcation.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/user/test_sent_notifcation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/user/test_users_changepassword.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/user/test_users_changepassword.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/user/test_staff_regstration.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/user/test_staff_regstration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/user/test_vistior_reg_role.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/visitors/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/visitors/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/visitors/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/visitors/views.py" afterDir="false" />
     </list>
@@ -86,6 +86,11 @@
           <url>file://$PROJECT_DIR$/tests/user/test_compliant_file_user.py</url>
           <line>135</line>
           <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/visitors/views.py</url>
+          <line>123</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -2,6 +2,7 @@ import pytest
 from user.models import User
 from rest_framework.test import APIClient
 from resident.models import UserRole
+from staffresident.models import StaffRole, RolesStaff
 
 
 @pytest.fixture()
